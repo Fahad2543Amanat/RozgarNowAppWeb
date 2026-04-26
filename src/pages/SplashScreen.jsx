@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
+// import logo from "../assets/logoimg.jpeg";
+import logo1 from "../assets/bgremovelogo.png";
 function SplashScreen() {
   const navigate = useNavigate();
 
@@ -20,15 +21,34 @@ function SplashScreen() {
 
         {/* IMAGE */}
         <img
-          src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png"
+          src={logo1}
           alt="logo"
           style={styles.image}
         />
 
-        <h2 style={styles.title}>Rozgar Now</h2>
+        <style>
+{`
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+`}
+</style>
 
+        <h3 style={styles.title}>Rozgar Now</h3>
+        <h2 style={styles.tagline}>Rozgar sab k liye, Kam mily asani sy</h2>
         {/* LOADING */}
         <div style={styles.loader}></div>
+
+        <style>
+      {`
+      @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+        }
+        `}
+</style>
 
       </div>
 
@@ -57,11 +77,17 @@ const styles = {
   image: {
     width: "120px",
     marginBottom: "10px",
+    animation: "pulse 1.5s ease-in-out infinite"
   },
 
   title: {
     margin: "10px 0",
     fontSize: "22px",
+    fontWeight: "bold",
+  },
+  tagline: {
+    margin: "10px 0",
+    fontSize: "18px",
     fontWeight: "bold",
   },
 
@@ -73,5 +99,6 @@ const styles = {
     borderRadius: "50%",
     margin: "15px auto",
     animation: "spin 1s linear infinite",
+    // boxShadow: "0 0 15px rgba(255,255,255,0.6)"
   },
 };
