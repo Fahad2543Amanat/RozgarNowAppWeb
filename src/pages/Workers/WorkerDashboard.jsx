@@ -11,6 +11,20 @@ function WorkerDashboard() {
   const completedJobs = myJobs.filter(j => j.status === "Completed").length;
   const activeJobs = myJobs.filter(j => j.status !== "Completed").length;
 
+  // 💰 EARNINGS LOGIC (same as Earnings page)
+  const earnings = myJobs
+    .filter(j => j.status === "Completed")
+    .reduce((acc, job) => {
+      const bid = Number(job.bid);
+
+      const fallback =
+        (Number(job.budgetMin || 0) + Number(job.budgetMax || 0)) / 2;
+
+      const earning = bid > 0 ? bid : fallback;
+
+      return acc + earning;
+    }, 0);
+
   return (
     <div style={styles.container}>
 
@@ -22,12 +36,13 @@ function WorkerDashboard() {
         </div>
       </div>
 
-      {/* STATS */}
+      {/* STATS (CLIENT STYLE CARDS) */}
       <div style={styles.grid}>
-        <GlassCard icon="📦" title="Total Jobs" value={totalJobs} />
-        <GlassCard icon="📨" title="Applied" value={appliedJobs} />
-        <GlassCard icon="⚡" title="Active" value={activeJobs} />
-        <GlassCard icon="✅" title="Completed" value={completedJobs} />
+        <Card title="Total Jobs" value={totalJobs} icon="📦" />
+        <Card title="Applied Jobs" value={appliedJobs} icon="📨" />
+        <Card title="Active Jobs" value={activeJobs} icon="⚡" />
+        <Card title="Completed Jobs" value={completedJobs} icon="✅" />
+        <Card title="Earnings" value={`Rs ${earnings}`} icon="💰" />
       </div>
 
       {/* ACTIONS */}
@@ -42,10 +57,10 @@ function WorkerDashboard() {
       <div style={styles.section}>
         <h3 style={styles.sectionTitle}>Recent Jobs</h3>
 
-        {jobs.slice(0, 3).map(job => (
-          <div key={job.id} style={styles.glassCard}>
-            <h4 style={styles.cardTitle}>{job.title}</h4>
-            <p style={styles.cardText}>{job.description}</p>
+        {jobs.slice(0, 4).map(job => (
+          <div key={job.id} style={styles.recentCard}>
+            <h4 style={styles.jobTitle}>{job.title}</h4>
+            <p style={styles.desc}>{job.description}</p>
           </div>
         ))}
       </div>
@@ -54,10 +69,10 @@ function WorkerDashboard() {
       <div style={styles.section}>
         <h3 style={styles.sectionTitle}>My Work</h3>
 
-        {myJobs.slice(0, 3).map(job => (
-          <div key={job.id} style={styles.glassCard}>
-            <h4 style={styles.cardTitle}>{job.title}</h4>
-            <p style={styles.cardText}>Status: {job.status}</p>
+        {myJobs.slice(0, 4).map(job => (
+          <div key={job.id} style={styles.recentCard}>
+            <h4 style={styles.jobTitle}>{job.title}</h4>
+            <p style={styles.desc}>Status: {job.status}</p>
           </div>
         ))}
       </div>
@@ -66,18 +81,22 @@ function WorkerDashboard() {
   );
 }
 
-/* 🔹 GLASS CARD */
-function GlassCard({ icon, title, value }) {
+/* =========================
+   REUSABLE CARD
+========================= */
+function Card({ title, value, icon }) {
   return (
-    <div style={styles.statCard}>
+    <div style={styles.card}>
       <div style={styles.icon}>{icon}</div>
-      <h4 style={styles.statTitle}>{title}</h4>
-      <h2 style={styles.statValue}>{value}</h2>
+      <h4 style={styles.cardTitle}>{title}</h4>
+      <h2 style={styles.cardValue}>{value}</h2>
     </div>
   );
 }
 
-/* 🔹 ACTION CARD */
+/* =========================
+   ACTION CARD
+========================= */
 function ActionCard({ title, onClick }) {
   return (
     <div style={styles.actionCard} onClick={onClick}>
@@ -86,14 +105,15 @@ function ActionCard({ title, onClick }) {
   );
 }
 
-/* 🎨 PREMIUM GLASS STYLES */
+/* =========================
+   STYLES (CLIENT STYLE MATCHED)
+========================= */
 const styles = {
   container: {
-    padding: "25px",
+    padding: "20px",
+    background: "#fff",
     minHeight: "100vh",
-    fontFamily: "Arial",
-    background: "linear-gradient(135deg, #fff2d7, #ffbb00)",
-    color: "white"
+    fontFamily: "Arial"
   },
 
   header: {
@@ -104,100 +124,99 @@ const styles = {
     margin: 0,
     fontSize: "22px",
     fontWeight: "700",
-    color :"#000000",
+    color: "#ff6a00"
   },
 
   subText: {
     margin: 0,
-    color: "#000000",
+    color: "#777",
     fontSize: "13px"
   },
 
+  /* GRID SAME AS CLIENT */
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-    gap: "15px",
-    marginBottom: "25px",
-    
+    gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+    gap: "12px",
+    marginBottom: "20px"
   },
 
-  /* 🌫 GLASS CARD */
-  statCard: {
-    background: "rgba(255,255,255,0.08)",
-    backdropFilter: "blur(12px)",
-    WebkitBackdropFilter: "blur(12px)",
-    borderRadius: "15px",
-    padding: "18px",
-    textAlign: "center",
-    border: "1px solid rgba(255,255,255,0.15)",
-    boxShadow: "0 8px 25px rgba(0,0,0,0.2)"
+  /* CARD (CLIENT STYLE) */
+  card: {
+    background: "#fff",
+    padding: "15px",
+    borderRadius: "12px",
+    border: "1px solid #eee",
+    boxShadow: "0 5px 20px rgba(0,0,0,0.05)",
+    textAlign: "center"
   },
 
   icon: {
-    fontSize: "22px"
+    fontSize: "20px"
   },
 
-  statTitle: {
-    margin: "6px 0",
+  cardTitle: {
+    margin: "5px 0",
     fontSize: "13px",
-    color: "#1a1a1a"
+    color: "#444"
   },
 
-  statValue: {
+  cardValue: {
     margin: 0,
-    color: "#ff9f1c"
+    color: "#ff6a00"
   },
 
+  /* ACTIONS */
   actions: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
     gap: "12px",
-    marginBottom: "25px"
+    marginBottom: "20px"
   },
 
   actionCard: {
-    background: "linear-gradient(135deg, #ff6a00, #ff9f1c)",
-    padding: "14px",
+    background: "linear-gradient(90deg, #ff6a00, #ff9f1c)",
+    color: "white",
+    padding: "15px",
     borderRadius: "12px",
     textAlign: "center",
     fontWeight: "600",
-    cursor: "pointer",
-    color: "white",
-    boxShadow: "0 8px 20px rgba(255,106,0,0.25)"
+    cursor: "pointer"
   },
 
+  /* SECTIONS */
   section: {
-    marginTop: "20px"
+    marginTop: "25px"
   },
 
   sectionTitle: {
-    marginBottom: "10px",
-    fontSize: "16px",
-    color: "#000000"
+    marginBottom: "12px",
+    fontSize: "18px",
+    fontWeight: "600",
+    color: "#222"
   },
 
-  /* 🌫 GLASS LIST CARD */
-  glassCard: {
-    background: "rgba(255,255,255,0.06)",
-    backdropFilter: "blur(10px)",
-    WebkitBackdropFilter: "blur(10px)",
+  /* LIST CARD */
+  recentCard: {
+    background: "#fff",
     padding: "14px",
     borderRadius: "12px",
     marginBottom: "10px",
-    border: "1px solid rgba(255,255,255,0.1)"
+    border: "1px solid #eee",
+    boxShadow: "0 4px 15px rgba(0,0,0,0.05)"
   },
 
-  cardTitle: {
+  jobTitle: {
     margin: 0,
     fontSize: "14px",
     fontWeight: "600",
-    color :"#ff6a00"
+    color: "#ff6a00"
   },
 
-  cardText: {
-    margin: "4px 0 0 0",
+  desc: {
+    margin: "5px 0 0 0",
     fontSize: "12px",
-    color: "#474747"
+    color: "#555"
   }
 };
 
