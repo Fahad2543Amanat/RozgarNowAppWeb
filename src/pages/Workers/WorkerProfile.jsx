@@ -97,7 +97,7 @@ function WorkerProfile() {
 
         <div style={styles.card}>
           <h3>💰 Earnings</h3>
-          <h2>${stats.earnings.toFixed(2)}</h2>
+          <h2>Rs. {stats.earnings.toFixed(2)}</h2>
         </div>
 
       </div>
