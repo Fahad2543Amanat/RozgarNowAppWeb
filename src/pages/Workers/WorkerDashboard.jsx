@@ -190,13 +190,14 @@ const styles = {
   cardTitle: {
     margin: 0,
     fontSize: "14px",
-    fontWeight: "600"
+    fontWeight: "600",
+    color :"#ff6a00"
   },
 
   cardText: {
     margin: "4px 0 0 0",
     fontSize: "12px",
-    color: "#cbd5e1"
+    color: "#474747"
   }
 };
 

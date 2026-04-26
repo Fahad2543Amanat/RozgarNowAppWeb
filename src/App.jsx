@@ -22,6 +22,7 @@ import WorkerChat from "./pages/Workers/WorkerChat";
 import Earnings from "./pages/Workers/Earnings";
 import WorkerProfile from "./pages/Workers/WorkerProfile";
 import WorkerSettings from "./pages/Workers/WorkerSettings";
+import SplashScreen from "./pages/SplashScreen";
 
 
 
@@ -29,9 +30,11 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* 🚀 SPLASH FIRST SCREEN */}
+        <Route path="/" element={<SplashScreen />} />
 
         {/* 🔐 LOGIN */}
-        <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         
 

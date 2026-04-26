@@ -122,7 +122,7 @@ function Signup() {
         </div>
 
         <div style={styles.footer}>
-          <span onClick={() => navigate("/")}>Already have account?</span>
+          <span onClick={() => navigate("/login")}>Already have account?</span>
         </div>
 
       </div>

@@ -66,9 +66,9 @@ function WorkerLayout() {
         </NavLink>
 
         {/* TASKS */}
-        <NavLink onClick={() => setOpen(false)} to="/worker/tasks" style={styles.link}>
+        {/* <NavLink onClick={() => setOpen(false)} to="/worker/tasks" style={styles.link}>
           📝 Tasks
-        </NavLink>
+        </NavLink> */}
 
         {/* CHAT */}
         <NavLink onClick={() => setOpen(false)} to="/worker/chat" style={styles.link}>
