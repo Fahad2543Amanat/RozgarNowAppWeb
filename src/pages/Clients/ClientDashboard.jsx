@@ -13,7 +13,7 @@ function ClientDashboard() {
       {/* HEADER */}
       <div style={styles.header}>
         <div>
-          <h2 style={{ margin: 0 }}>🔥 Dashboard</h2>
+          <h2 style={{ margin: 0 }}>Dashboard</h2>
           <p style={styles.subText}>Manage your projects efficiently</p>
         </div>
 
@@ -36,32 +36,48 @@ function ClientDashboard() {
       </div>
 
       {/* RECENT JOBS */}
-      <div style={styles.section}>
-        <h3>Recent Jobs</h3>
+    {/* RECENT JOBS */}
+<div style={styles.section}>
+  <h3 style={styles.sectionTitle}>Recent Jobs</h3>
 
-        {jobs.slice(0, 4).map(job => (
-          <div key={job.id} style={styles.jobCard}>
-            <div style={styles.jobInfo}>
-              <h4 style={{ margin: 0 }}>{job.title}</h4>
-              <p style={styles.desc}>{job.description}</p>
-            </div>
+  {jobs.slice(0, 4).map(job => (
+    <div key={job.id} style={styles.recentCard}>
 
-            <span style={{
-              ...styles.badge,
-              background:
-                job.status === "Completed"
-                  ? "#22c55e"
-                  : job.status === "Active"
-                  ? "#ff7a00"
-                  : "#f59e0b"
-            }}>
-              {job.status}
-            </span>
-          </div>
-        ))}
+      {/* TOP */}
+      <div style={styles.topRow}>
+        <h4 style={styles.title}>{job.title}</h4>
 
-        {jobs.length === 0 && <p>No jobs found</p>}
+        <span style={{
+          ...styles.badge,
+          background:
+            job.status === "Completed"
+              ? "#22c55e"
+              : job.status === "Active"
+              ? "#ff7a00"
+              : "#f59e0b"
+        }}>
+          {job.status}
+        </span>
       </div>
+
+      {/* DESC */}
+      <p style={styles.desc}>{job.description}</p>
+
+      {/* DIVIDER */}
+      <div style={styles.divider}></div>
+
+      {/* INFO */}
+      <div style={styles.infoRow}>
+        <span>💰 {job.budgetMin} - {job.budgetMax}</span>
+        <span>⏳ {job.deadline}</span>
+        <span>⚡{job.priority}</span>
+      </div>
+
+    </div>
+  ))}
+
+  {jobs.length === 0 && <p>No jobs found</p>}
+</div>
 
     </div>
   );
@@ -162,40 +178,80 @@ const styles = {
   },
 
   /* SECTION */
-  section: {
-    background: "#fff",
-    padding: "15px",
-    borderRadius: "12px",
-    border: "1px solid #eee"
-  },
+  // section: {
+  //   background: "#fff",
+  //   padding: "15px",
+  //   borderRadius: "12px",
+  //   border: "1px solid #eee"
+  // },
+ section: {
+  marginTop: "25px"
+},
 
-  jobCard: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "10px 0",
-    borderBottom: "1px solid #eee",
-    flexWrap: "wrap",
-    gap: "8px"
-  },
+sectionTitle: {
+  marginBottom: "12px",
+  fontSize: "18px",
+  fontWeight: "600"
+},
 
-  jobInfo: {
-    flex: 1,
-    minWidth: "200px"
-  },
+recentCard: {
+  background: "#fff",
+  padding: "16px",
+  borderRadius: "14px",
+  marginBottom: "12px",
+  boxShadow: "0 8px 25px rgba(0,0,0,0.06)",
+  display: "flex",
+  flexDirection: "column",
+  gap: "10px" // 🔥 main fix
+},
 
-  desc: {
-    color: "#777",
-    margin: 0,
-    fontSize: "13px"
-  },
+topRow: {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  gap: "10px"
+},
 
-  badge: {
-    padding: "5px 10px",
-    borderRadius: "20px",
-    fontSize: "12px",
-    color: "white"
-  }
+title: {
+  margin: 0,
+  fontSize: "15px",
+  fontWeight: "600",
+  flex: 1
+},
+
+desc: {
+  margin: 0,
+  fontSize: "13px",
+  color: "#666",
+  lineHeight: "1.5",
+  display: "-webkit-box",
+  WebkitLineClamp: 2,   // 🔥 2 lines max
+  WebkitBoxOrient: "vertical",
+  overflow: "hidden"
+},
+
+divider: {
+  height: "1px",
+  background: "#eee"
+},
+
+infoRow: {
+  display: "flex",
+  justifyContent: "space-between",
+  flexWrap: "wrap",
+  fontSize: "12px",
+  color: "#444",
+  gap: "8px"
+},
+
+badge: {
+  color: "#fff",
+  padding: "5px 10px",
+  borderRadius: "20px",
+  fontSize: "11px",
+  whiteSpace: "nowrap"
+}
+  
 };
 
 export default ClientDashboard;
