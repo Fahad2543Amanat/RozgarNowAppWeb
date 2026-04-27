@@ -7,6 +7,7 @@ function Signup() {
   const [role, setRole] = useState("client");
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
   
 
   /* ================= COMMON ================= */
@@ -81,24 +82,78 @@ function Signup() {
     );
   };
 
+  const validate = () => {
+  let newErrors = {};
+
+  /* ================= COMMON ================= */
+  if (!password) newErrors.password = "Password required";
+  if (password.length < 6) newErrors.password = "Min 6 characters";
+
+  if (password !== confirm) newErrors.confirm = "Passwords do not match";
+
+  /* ================= WORKER ================= */
+  if (role === "worker") {
+    if (!worker.name) newErrors.name = "Full name required";
+
+    if (!worker.phone) newErrors.phone = "Phone required";
+    else if (!/^03\d{9}$/.test(worker.phone))
+      newErrors.phone = "Invalid phone (03XXXXXXXXX)";
+
+    if (!worker.cnic) newErrors.cnic = "CNIC required";
+    else if (!/^\d{13}$/.test(worker.cnic))
+      newErrors.cnic = "CNIC must be 13 digits";
+
+    if (!worker.city) newErrors.city = "City required";
+
+    if (worker.skills.length === 0)
+      newErrors.skills = "Select at least one skill";
+
+    if (!worker.experience)
+      newErrors.experience = "Experience required";
+
+    if (!worker.location)
+      newErrors.location = "Location required";
+  }
+
+  /* ================= CLIENT ================= */
+  if (role === "client") {
+    if (!client.company) newErrors.company = "Company name required";
+
+    if (!client.owner) newErrors.owner = "Owner name required";
+
+    if (!client.phone) newErrors.phone = "Phone required";
+    else if (!/^03\d{9}$/.test(client.phone))
+      newErrors.phone = "Invalid phone number";
+
+    if (!client.category)
+      newErrors.category = "Business category required";
+
+    if (!client.address)
+      newErrors.address = "Address required";
+  }
+
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
+
   const handleSubmit = () => {
-    if (password !== confirm) return alert("Password mismatch");
+  if (!validate()) return;
 
-    setLoading(true);
+  setLoading(true);
 
-    setTimeout(() => {
-      localStorage.setItem("role", role);
+  setTimeout(() => {
+    localStorage.setItem("role", role);
 
-      if (role === "worker") {
-        localStorage.setItem("workerData", JSON.stringify(worker));
-      } else {
-        localStorage.setItem("clientData", JSON.stringify(client));
-      }
+    if (role === "worker") {
+      localStorage.setItem("workerData", JSON.stringify(worker));
+    } else {
+      localStorage.setItem("clientData", JSON.stringify(client));
+    }
 
-      setLoading(false);
-      navigate(role === "client" ? "/client" : "/worker");
-    }, 800);
-  };
+    setLoading(false);
+    navigate(role === "client" ? "/client" : "/worker");
+  }, 800);
+};
 
   /* ================= UI ================= */
 
@@ -134,6 +189,7 @@ function Signup() {
               onFocus={(e) => e.target.style.border = "1px solid #ff6a00"}
               onBlur={(e) => e.target.style.border = "1px solid #ffd2b3"}
             />
+            {errors.company && <p style={styles.error}>{errors.company}</p>}
 
             <input placeholder="Owner Name"
               onChange={e=>setClient({...client, owner:e.target.value})}
@@ -141,6 +197,7 @@ function Signup() {
               onFocus={(e) => e.target.style.border = "1px solid #ff6a00"}
               onBlur={(e) => e.target.style.border = "1px solid #ffd2b3"}
             />
+            {errors.owner && <p style={styles.error}>{errors.owner}</p>}
 
             <input placeholder="Phone"
               onChange={e=>setClient({...client, phone:e.target.value})}
@@ -519,6 +576,13 @@ const styles = {
     color: "#666",
     marginTop: "5px"
   },
+  error: {
+  color: "red",
+  fontSize: "12px",
+  marginTop: "-5px",
+  marginBottom: "8px",
+  marginLeft: "10px"
+},
   /* ================= RESPONSIVE ================= */
   /* 👉 mobile ke liye card thoda full width */
   "@media (max-width: 480px)": {
