@@ -8,6 +8,8 @@ function Signup() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   
 
   /* ================= COMMON ================= */
@@ -93,26 +95,34 @@ function Signup() {
 
   /* ================= WORKER ================= */
   if (role === "worker") {
-    if (!worker.name) newErrors.name = "Full name required";
+    // ✅ STEP BASED VALIDATION
+    if (step >= 1) {
+      if (!worker.name) newErrors.name = "Full name required";
 
-    if (!worker.phone) newErrors.phone = "Phone required";
-    else if (!/^03\d{9}$/.test(worker.phone))
-      newErrors.phone = "Invalid phone (03XXXXXXXXX)";
+      if (!worker.phone) newErrors.phone = "Phone required";
+      else if (!/^03\d{9}$/.test(worker.phone))
+        newErrors.phone = "Invalid phone (03XXXXXXXXX)";
 
-    if (!worker.cnic) newErrors.cnic = "CNIC required";
-    else if (!/^\d{13}$/.test(worker.cnic))
-      newErrors.cnic = "CNIC must be 13 digits";
+      if (!worker.cnic) newErrors.cnic = "CNIC required";
+      else if (!/^\d{13}$/.test(worker.cnic))
+        newErrors.cnic = "CNIC must be 13 digits";
 
-    if (!worker.city) newErrors.city = "City required";
+      if (!worker.city) newErrors.city = "City required";
+    }
+    if (step >= 2) {
+      if (worker.skills.length === 0)
+        newErrors.skills = "Select at least one skill";
 
-    if (worker.skills.length === 0)
-      newErrors.skills = "Select at least one skill";
+      if (!worker.experience)
+        newErrors.experience = "Experience required";
+    }
+    if (step >= 4) {
+      if (!worker.location)
+        newErrors.location = "Location required";
 
-    if (!worker.experience)
-      newErrors.experience = "Experience required";
-
-    if (!worker.location)
-      newErrors.location = "Location required";
+      if (!worker.radius)
+        newErrors.radius = "Radius required";
+    }
   }
 
   /* ================= CLIENT ================= */
@@ -134,6 +144,68 @@ function Signup() {
 
   setErrors(newErrors);
   return Object.keys(newErrors).length === 0;
+};
+
+const validateStep1 = () => {
+  let err = {};
+
+  if (!worker.name?.trim())
+    err.name = "Full name required";
+
+  if (!worker.phone?.trim())
+    err.phone = "Phone required";
+  else if (!/^03\d{9}$/.test(worker.phone))
+    err.phone = "Invalid phone (03XXXXXXXXX)";
+
+  if (!worker.cnic?.trim())
+    err.cnic = "CNIC required";
+  else if (!/^\d{13}$/.test(worker.cnic))
+    err.cnic = "CNIC must be 13 digits";
+
+  if (!worker.city?.trim())
+    err.city = "City required";
+
+  setErrors(err);
+  return Object.keys(err).length === 0;
+};
+
+const validateStep2 = () => {
+  let err = {};
+
+  if (!worker.skills || worker.skills.length === 0)
+    err.skills = "Select at least one skill";
+
+  if (!worker.experience)
+    err.experience = "Experience required";
+  else if (isNaN(worker.experience))
+    err.experience = "Must be a number";
+
+  setErrors(err);
+  return Object.keys(err).length === 0;
+};
+// const validateStep3 = () => {
+//   // File uploads optional rakh sakte ho
+//   let err = {};
+
+//   // agar mandatory karna ho to uncomment:
+//   // if (!worker.cnicFront) err.file = "Upload CNIC front";
+
+//   setErrors(err);
+//   return Object.keys(err).length === 0;
+// };
+const validateStep4 = () => {
+  let err = {};
+
+  if (!worker.location?.trim())
+    err.location = "Location required";
+
+  if (!worker.radius)
+    err.radius = "Radius required";
+  else if (isNaN(worker.radius))
+    err.radius = "Must be a number";
+
+  setErrors(err);
+  return Object.keys(err).length === 0;
 };
 
   const handleSubmit = () => {
@@ -205,6 +277,7 @@ function Signup() {
               onFocus={(e) => e.target.style.border = "1px solid #ff6a00"}
               onBlur={(e) => e.target.style.border = "1px solid #ffd2b3"}
             />
+            {errors.phone && <p style={styles.error}>{errors.phone}</p>}
 
             <input placeholder="Business Category"
               onChange={e=>setClient({...client, category:e.target.value})}
@@ -212,6 +285,7 @@ function Signup() {
               onFocus={(e) => e.target.style.border = "1px solid #ff6a00"}
               onBlur={(e) => e.target.style.border = "1px solid #ffd2b3"}
             />
+            {errors.category && <p style={styles.error}>{errors.category}</p>}
 
             <input placeholder="Address"
               onChange={e=>setClient({...client, address:e.target.value})}
@@ -219,25 +293,51 @@ function Signup() {
               onFocus={(e) => e.target.style.border = "1px solid #ff6a00"}
               onBlur={(e) => e.target.style.border = "1px solid #ffd2b3"}
             />
+            {errors.address && <p style={styles.error}>{errors.address}</p>}
 
             <h4>Upload Documents</h4>
+            <p style={styles.uploadfiletext}>Upload Logo Image <span style={{color:"red"}}>*</span></p>
             <input type="file" style={styles.file}/>
+            <p style={styles.uploadfiletext}>Upload Business documents <span style={{color:"red"}}>*</span></p>
+            <input type="file" style={styles.file}/>
+            <p style={styles.uploadfiletext}>Upload NTN(optional)</p>
             <input type="file" style={styles.file}/>
 
             {/* PASSWORD */}
-            <input type="password" placeholder="Password"
+            <div style={styles.passBox}>
+            <input type={showPassword ? "text" : "password"} placeholder="Password"
               onChange={e=>setPassword(e.target.value)}
               style={styles.input}
               onFocus={(e) => e.target.style.border = "1px solid #ff6a00"}
               onBlur={(e) => e.target.style.border = "1px solid #ffd2b3"}
+              
             />
+            <span
+    onClick={() => setShowPassword(!showPassword)}
+    style={styles.eye}
+  >
+    {showPassword ? "🙈" : "👁"}
+  </span>
 
-            <input type="password" placeholder="Confirm Password"
+            </div>
+            {errors.password && <p style={styles.error}>{errors.password}</p>}
+          {/* // Confirm password */}
+          <div style={styles.passBox}>
+            <input type={showConfirm ? "text" : "password"} placeholder="Confirm Password"
               onChange={e=>setConfirm(e.target.value)}
               style={styles.input}
               onFocus={(e) => e.target.style.border = "1px solid #ff6a00"}
               onBlur={(e) => e.target.style.border = "1px solid #ffd2b3"}
             />
+            <span
+          onClick={() => setShowConfirm(!showConfirm)}
+          style={styles.eye}
+            >
+            {showConfirm ? "🙈" : "👁"}
+            </span>
+
+          </div>
+            
 
             {/* ✅ STATUS SHOW */}
             <p style={{color:"#ff6a00", fontSize:"12px"}}>
@@ -246,194 +346,253 @@ function Signup() {
 
             <button onClick={handleSubmit} style={styles.btn}
             onMouseEnter={(e) => e.target.style.transform = "scale(1.03)"}
-  onMouseLeave={(e) => e.target.style.transform = "scale(1)"}
+            onMouseLeave={(e) => e.target.style.transform = "scale(1)"}
             >
               {loading ? "Creating..." : "Create Account"}
             </button>
+            <p style={styles.alreadyaccount}
+            onClick={() => navigate("/login")}
+            >
+              Already have an account?
+            </p>
           </>
         )}
 
         {/* ================= WORKER FLOW ================= */}
         {role === "worker" && (
+  <>
 
-          <>
-            {/* STEP 1 */}
-            {step === 1 && (
-              <>
-                <input placeholder="Full Name"
-                  onChange={e=>setWorker({...worker,name:e.target.value})}
-                  style={styles.input}
-                  onFocus={(e) => e.target.style.border = "1px solid #ff6a00"}
-              onBlur={(e) => e.target.style.border = "1px solid #ffd2b3"}
-                />
-                <input placeholder="Phone"
-                  onChange={e=>setWorker({...worker,phone:e.target.value})}
-                  style={styles.input}
-                  onFocus={(e) => e.target.style.border = "1px solid #ff6a00"}
-              onBlur={(e) => e.target.style.border = "1px solid #ffd2b3"}
-                />
-                <input placeholder="CNIC"
-                  onChange={e=>setWorker({...worker,cnic:e.target.value})}
-                  style={styles.input}
-                  onFocus={(e) => e.target.style.border = "1px solid #ff6a00"}
-              onBlur={(e) => e.target.style.border = "1px solid #ffd2b3"}
-                />
-                <input placeholder="City"
-                  onChange={e=>setWorker({...worker,city:e.target.value})}
-                  style={styles.input}
-                  onFocus={(e) => e.target.style.border = "1px solid #ff6a00"}
-              onBlur={(e) => e.target.style.border = "1px solid #ffd2b3"}
-                />
+    {/* ================= STEP 1 ================= */}
+    {step === 1 && (
+      <>
+        <input
+          placeholder="Full Name"
+          value={worker.name}
+          onChange={(e) => setWorker({ ...worker, name: e.target.value })}
+          style={styles.input}
+          onFocus={(e) => (e.target.style.border = "1px solid #ff6a00")}
+          onBlur={(e) => (e.target.style.border = "1px solid #ffd2b3")}
+        />
+        {errors.name && <p style={styles.error}>{errors.name}</p>}
 
-                <button onClick={()=>setStep(2)} style={styles.btn}
-                  onMouseEnter={(e) => e.target.style.transform = "scale(1.03)"}
-  onMouseLeave={(e) => e.target.style.transform = "scale(1)"}
-                  >
-                  Continue
-                </button>
-              </>
-            )}
+        <input
+          placeholder="Phone"
+          value={worker.phone}
+          onChange={(e) => setWorker({ ...worker, phone: e.target.value })}
+          style={styles.input}
+        />
+        {errors.phone && <p style={styles.error}>{errors.phone}</p>}
 
-            {/* STEP 2 - SKILLS */}
-            {step === 2 && (
-              <>
-                <h4>Select Skills</h4>
+        <input
+          placeholder="CNIC"
+          value={worker.cnic}
+          onChange={(e) => setWorker({ ...worker, cnic: e.target.value })}
+          style={styles.input}
+        />
+        {errors.cnic && <p style={styles.error}>{errors.cnic}</p>}
 
-                <div style={styles.skills}>
-                  {skillsList.map(skill => (
-                    <div
-                      key={skill}
-                      onClick={()=>toggleSkill(skill)}
-                      style={{
-                        ...styles.skill,
-                        background: worker.skills.includes(skill)
-                          ? "#ff6a00" : "#fff",
-                          color: worker.skills.includes(skill) ? "#fff" : "#000",
-                          transform: worker.skills.includes(skill) ? "scale(1.05)" : "scale(1)"
-                      }}
-                    >
-                      {skill}
-                    </div>
-                  ))}
-                </div>
+        <input
+          placeholder="City"
+          value={worker.city}
+          onChange={(e) => setWorker({ ...worker, city: e.target.value })}
+          style={styles.input}
+        />
+        {errors.city && <p style={styles.error}>{errors.city}</p>}
 
-                <input placeholder="Experience Years"
-                  onChange={e=>setWorker({...worker,experience:e.target.value})}
-                  style={styles.input}
-                  onFocus={(e) => e.target.style.border = "1px solid #ff6a00"}
-                  onBlur={(e) => e.target.style.border = "1px solid #ffd2b3"}
-                />
+        <button
+          onClick={() => {
+            if (!validateStep1()) return;
+            setStep(2);
+          }}
+          style={styles.btn}
+        >
+          Continue
+        </button>
+      </>
+    )}
 
-                <div style={styles.row}>
-                  <button onClick={()=>setStep(1)} style={styles.back}>
-                    Back
-                  </button>
-                  <button onClick={()=>setStep(3)} style={styles.btn}
-                    onMouseEnter={(e) => e.target.style.transform = "scale(1.03)"}
-  onMouseLeave={(e) => e.target.style.transform = "scale(1)"}
-                    >
-                    Next
-                  </button>
-                </div>
-              </>
-            )}
+    {/* ================= STEP 2 ================= */}
+    {step === 2 && (
+      <>
+        <h4>Select Skills</h4>
+        {errors.skills && <p style={styles.error}>{errors.skills}</p>}
 
-            {/* STEP 3 - UPLOAD */}
-            {step === 3 && (
-              <>
-                <h4>Upload Verification</h4>
-                <input type="file" style={styles.file} />
-                <input type="file" style={styles.file}/>
-                <input type="file" style={styles.file}/>
+        <div style={styles.skills}>
+          {skillsList.map((skill) => (
+            <div
+              key={skill}
+              onClick={() => toggleSkill(skill)}
+              style={{
+                ...styles.skill,
+                background: worker.skills.includes(skill) ? "#ff6a00" : "#fff",
+                color: worker.skills.includes(skill) ? "#fff" : "#000",
+                transform: worker.skills.includes(skill) ? "scale(1.05)" : "scale(1)",
+              }}
+            >
+              {skill}
+            </div>
+          ))}
+        </div>
 
-                <div style={styles.row}>
-                  <button onClick={()=>setStep(2)} style={styles.back}>
-                    Back
-                  </button>
-                  <button onClick={()=>setStep(4)} style={styles.btn}
-                    onMouseEnter={(e) => e.target.style.transform = "scale(1.03)"}
-  onMouseLeave={(e) => e.target.style.transform = "scale(1)"}
-                    >
-                    Next
-                  </button>
-                </div>
-              </>
-            )}
+        <input
+          placeholder="Experience Years"
+          value={worker.experience}
+          onChange={(e) =>
+            setWorker({ ...worker, experience: e.target.value })
+          }
+          style={styles.input}
+        />
+        {errors.experience && <p style={styles.error}>{errors.experience}</p>}
 
-            {/* STEP 4 */}
-            {/* STEP 4 - LOCATION */}
-            {step === 4 && (
-              <>
-                <h4>Location Setup</h4>
+        <div style={styles.row}>
+          <button onClick={() => setStep(1)} style={styles.back}>
+            Back
+          </button>
 
-                <button onClick={getLocation} style={styles.btn}
-                onMouseEnter={(e) => e.target.style.transform = "scale(1.03)"}
-  onMouseLeave={(e) => e.target.style.transform = "scale(1)"}
-                >
-                  📍 Detect Location (GPS)
-                </button>
+          <button
+            onClick={() => {
+              if (!validateStep2()) return;
+              setStep(3);
+            }}
+            style={styles.btn}
+          >
+            Next
+          </button>
+        </div>
+      </>
+    )}
 
-                <input
-                  placeholder="Or Enter City Manually"
-                  onChange={e=>setWorker({...worker, location:e.target.value})}
-                  style={styles.input}
-                  onFocus={(e) => e.target.style.border = "1px solid #ff6a00"}
-              onBlur={(e) => e.target.style.border = "1px solid #ffd2b3"}
-                />
+    {/* ================= STEP 3 ================= */}
+    {step === 3 && (
+      <>
+        <h4>Upload Verification</h4>
 
-                <input
-                  placeholder="Job Radius (e.g. 5km)"
-                  onChange={e=>setWorker({...worker, radius:e.target.value})}
-                  style={styles.input}
-                  onFocus={(e) => e.target.style.border = "1px solid #ff6a00"}
-              onBlur={(e) => e.target.style.border = "1px solid #ffd2b3"}
-                />
+        <input type="file" style={styles.file} />
+        <input type="file" style={styles.file} />
+        <input type="file" style={styles.file} />
 
-                <div style={styles.row}>
-                  <button onClick={()=>setStep(3)} style={styles.back}>
-                    Back
-                  </button>
-                  <button onClick={()=>setStep(5)} style={styles.btn}
-                    onMouseEnter={(e) => e.target.style.transform = "scale(1.03)"}
-  onMouseLeave={(e) => e.target.style.transform = "scale(1)"}
-                    >
-                    Next
-                  </button>
-                </div>
-              </>
-            )}
-            {/* STEP 5 - PASSWORD */}
-            {step === 5 && (
-              <>
-                <input type="password" placeholder="Password"
-                  onChange={e=>setPassword(e.target.value)}
-                  style={styles.input}
-                  onFocus={(e) => e.target.style.border = "1px solid #ff6a00"}
-              onBlur={(e) => e.target.style.border = "1px solid #ffd2b3"}
-                />
+        <div style={styles.row}>
+          <button onClick={() => setStep(2)} style={styles.back}>
+            Back
+          </button>
 
-                <input type="password" placeholder="Confirm Password"
-                  onChange={e=>setConfirm(e.target.value)}
-                  style={styles.input}
-                  onFocus={(e) => e.target.style.border = "1px solid #ff6a00"}
-              onBlur={(e) => e.target.style.border = "1px solid #ffd2b3"}
-                />
+          <button onClick={() => setStep(4)} style={styles.btn}>
+            Next
+          </button>
+        </div>
+      </>
+    )}
 
-                {/* ✅ STATUS */}
-                <p style={{color:"#ff6a00", fontSize:"12px"}}>
-                  Verification: {worker.verificationStatus}
-                </p>
+    {/* ================= STEP 4 ================= */}
+    {step === 4 && (
+      <>
+        <h4>Location Setup</h4>
 
-                <button onClick={handleSubmit} style={styles.btn}
-                onMouseEnter={(e) => e.target.style.transform = "scale(1.03)"}
-  onMouseLeave={(e) => e.target.style.transform = "scale(1)"}
-                >
-                  {loading ? "Creating..." : "Create Account"}
-                </button>
-              </>
-            )}
-          </>
-        )}
+        <button
+          onClick={getLocation}
+          style={styles.btn}
+        >
+          📍 Detect Location (GPS)
+        </button>
+
+        {errors.location && <p style={styles.error}>{errors.location}</p>}
+
+        <input
+          placeholder="Or Enter City Manually"
+          value={worker.location}
+          onChange={(e) =>
+            setWorker({ ...worker, location: e.target.value })
+          }
+          style={styles.input}
+        />
+
+        <input
+          placeholder="Job Radius (e.g. 5km)"
+          value={worker.radius}
+          onChange={(e) =>
+            setWorker({ ...worker, radius: e.target.value })
+          }
+          style={styles.input}
+        />
+        {errors.radius && <p style={styles.error}>{errors.radius}</p>}
+
+        <div style={styles.row}>
+          <button onClick={() => setStep(3)} style={styles.back}>
+            Back
+          </button>
+
+          <button
+            onClick={() => {
+              if (!validateStep4()) return;
+              setStep(5);
+            }}
+            style={styles.btn}
+          >
+            Next
+          </button>
+        </div>
+      </>
+    )}
+
+    {/* ================= STEP 5 ================= */}
+    {step === 5 && (
+      <>
+      <div style={styles.passBox}>
+        <input
+          type={showPassword ? "text" : "password"}
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          style={styles.input}
+        />
+        <span
+    onClick={() => setShowPassword(prev => !prev)}
+    style={styles.eye}
+  >
+    {showPassword ? "🙈" : "👁"}
+  </span>
+      </div>
+        {errors.password && <p style={styles.error}>{errors.password}</p>}
+
+      <div style={styles.passBox}>
+        <input
+          type={showConfirm ? "text" : "password"}
+          placeholder="Confirm Password"
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+          style={styles.input}
+        />
+        <span
+    onClick={() => setShowConfirm(prev => !prev)}
+    style={styles.eye}
+  >
+    {showConfirm ? "🙈" : "👁"}
+  </span>
+
+      </div>
+        {errors.confirm && <p style={styles.error}>{errors.confirm}</p>}
+
+        {/* STATUS */}
+        <p style={{ color: "#ff6a00", fontSize: "12px" }}>
+          Verification: {worker.verificationStatus}
+        </p>
+
+        <button
+          onClick={handleSubmit}
+          style={styles.btn}
+        >
+          {loading ? "Creating..." : "Create Account"}
+        </button>
+        <p style={styles.alreadyaccount}
+            onClick={() => navigate("/login")}
+            >
+              Already have an account?
+            </p>
+      </>
+      
+    )}
+  </>
+)}
 
       </div>
     </div>
@@ -570,6 +729,11 @@ const styles = {
     background: "#fff7ed",
     boxSizing: "border-box",
   },
+  uploadfiletext:{
+    fontSize: "12px",
+    color: "#666",
+    marginTop: "5px"
+  },
   /* ================= SMALL TEXT ================= */
   smallText: {
     fontSize: "12px",
@@ -582,6 +746,23 @@ const styles = {
   marginTop: "-5px",
   marginBottom: "8px",
   marginLeft: "10px"
+},
+passBox: {
+  position: "relative"
+},
+
+eye: {
+  position: "absolute",
+  right: "12px",
+  top: "12px",
+  cursor: "pointer",
+  fontSize: "14px"
+},
+alreadyaccount:{
+  color :"#ff6a00",
+  fontSize:"12px",
+  textAlign:'center',
+  cursor:'pointer'
 },
   /* ================= RESPONSIVE ================= */
   /* 👉 mobile ke liye card thoda full width */
