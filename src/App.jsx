@@ -1,5 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import SplashScreen from "./pages/SplashScreen";
+import Onboarding from "./pages/Onboarding";
+
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 // ✅ CLIENT LAYOUT + PAGES
@@ -22,7 +25,7 @@ import WorkerChat from "./pages/Workers/WorkerChat";
 import Earnings from "./pages/Workers/Earnings";
 import WorkerProfile from "./pages/Workers/WorkerProfile";
 import WorkerSettings from "./pages/Workers/WorkerSettings";
-import SplashScreen from "./pages/SplashScreen";
+
 
 
 
@@ -32,6 +35,7 @@ function App() {
       <Routes>
         {/* 🚀 SPLASH FIRST SCREEN */}
         <Route path="/" element={<SplashScreen />} />
+        <Route path="/onboarding" element={<Onboarding />} />
 
         {/* 🔐 LOGIN */}
         <Route path="/login" element={<Login />} />

@@ -37,7 +37,7 @@ function Settings() {
 
   const logout = () => {
     localStorage.clear();
-    navigate("/");
+    navigate("/login");
   };
 
   return (

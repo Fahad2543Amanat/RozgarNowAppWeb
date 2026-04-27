@@ -8,7 +8,7 @@ function WorkerLayout() {
 
   const logout = () => {
     localStorage.clear();
-    navigate("/");
+    navigate("/login");
   };
 
   // 📱 screen detect

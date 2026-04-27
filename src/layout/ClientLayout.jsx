@@ -8,7 +8,7 @@ function ClientLayout() {
 
   const logout = () => {
     localStorage.clear();
-    navigate("/");
+    navigate("/login");
   };
 
   // 📱 detect screen size

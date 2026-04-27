@@ -59,7 +59,7 @@ function Login() {
             />
 
             <span onClick={() => setShowPass(!showPass)} style={styles.eye}>
-              {showPass ? "🙈" : "👁"}
+              {showPass ? "👁" : "🙈"}
             </span>
           </div>
 
@@ -133,7 +133,7 @@ function Login() {
         <div style={styles.footer}>
           <span>Forgot Password?</span>
           <span onClick={() => navigate("/signup")} style={{ cursor: "pointer" }}>
-  Create Account
+  Create an Account?
         </span>
         </div>
 

@@ -5,9 +5,17 @@ import logo1 from "../assets/bgremovelogo.png";
 function SplashScreen() {
   const navigate = useNavigate();
 
-  useEffect(() => {
+useEffect(() => {
     const timer = setTimeout(() => {
-      navigate("/login");
+
+      const isOnboarded = localStorage.getItem("onboarded");
+
+      if (isOnboarded) {
+        navigate("/login");       // ✅ onboarding already done
+      } else {
+        navigate("/onboarding");  // ✅ first time user
+      }
+
     }, 2500);
 
     return () => clearTimeout(timer);
@@ -26,28 +34,25 @@ function SplashScreen() {
           style={styles.image}
         />
 
-        <style>
+
+
+        <h3 style={styles.title}>Rozgar Now</h3>
+        <h2 style={styles.tagline}>Rozgar sab k liye, Kam mily asani sy</h2>
+        {/* LOADING */}
+        <div style={styles.loader}></div>
+       <style>
 {`
 @keyframes pulse {
   0% { transform: scale(1); }
   50% { transform: scale(1.1); }
   100% { transform: scale(1); }
 }
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
 `}
-</style>
-
-        <h3 style={styles.title}>Rozgar Now</h3>
-        <h2 style={styles.tagline}>Rozgar sab k liye, Kam mily asani sy</h2>
-        {/* LOADING */}
-        <div style={styles.loader}></div>
-
-        <style>
-      {`
-      @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-        }
-        `}
 </style>
 
       </div>
