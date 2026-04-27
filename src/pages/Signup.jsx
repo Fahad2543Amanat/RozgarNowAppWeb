@@ -271,7 +271,7 @@ const validateStep4 = () => {
             />
             {errors.owner && <p style={styles.error}>{errors.owner}</p>}
 
-            <input placeholder="Phone"
+            <input placeholder="exp: 03123456789"
               onChange={e=>setClient({...client, phone:e.target.value})}
               style={styles.input}
               onFocus={(e) => e.target.style.border = "1px solid #ff6a00"}
@@ -376,7 +376,7 @@ const validateStep4 = () => {
         {errors.name && <p style={styles.error}>{errors.name}</p>}
 
         <input
-          placeholder="Phone"
+          placeholder="exp: 03123456789"
           value={worker.phone}
           onChange={(e) => setWorker({ ...worker, phone: e.target.value })}
           style={styles.input}
@@ -384,7 +384,7 @@ const validateStep4 = () => {
         {errors.phone && <p style={styles.error}>{errors.phone}</p>}
 
         <input
-          placeholder="CNIC"
+          placeholder="exp: 3110387746578"
           value={worker.cnic}
           onChange={(e) => setWorker({ ...worker, cnic: e.target.value })}
           style={styles.input}
