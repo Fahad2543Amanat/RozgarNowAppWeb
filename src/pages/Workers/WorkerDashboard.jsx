@@ -12,6 +12,9 @@ function WorkerDashboard() {
   const completedJobs = myJobs.filter(j => j.status === "Completed").length;
   const activeJobs = myJobs.filter(j => j.status !== "Completed").length;
 
+  const completion = 85;
+const isMobile = window.innerWidth < 768;
+  
   // 💰 Earnings (OLD LOGIC SAME)
   const earnings = myJobs
     .filter(j => j.status === "Completed")
@@ -23,53 +26,125 @@ function WorkerDashboard() {
       return acc + earning;
     }, 0);
 
-  const isMobile = window.innerWidth < 768;
+  
 
   return (
     <div style={styles.container}>
 
       {/* ================= TOP SECTION (NEW) ================= */}
       <div style={styles.topBar}>
-        <div>
-          <h3>👋 Hi, {worker.name || "Worker"}</h3>
-          <p style={styles.small}>Ready to earn today?</p>
-        </div>
 
-        <div style={styles.topIcons}>
-          <span>🔔</span>
-          {/* <span>💬</span> */}
-        </div>
-      </div>
+  {/* LEFT SIDE */}
+  <div style={styles.topLeft}>
+    <h3 style={styles.title}>Worker Dashboard</h3>
+    
+  </div>
+
+  {/* RIGHT SIDE */}
+  <div style={styles.topIcons}>
+    <span style={styles.icon}>🔔</span>
+  </div>
+
+</div>
+<p style={styles.subText}>Professional overview of your work</p>
 
       {/* PROFILE COMPLETION */}
-      <div style={styles.profileBox}>
-        <p>Profile Completion: 70%</p>
-        <div style={styles.progress}>
-          <div style={{ ...styles.progressFill, width: "70%" }} />
-        </div>
-      </div>
+      {/* ================= PROFILE HEADER (UPDATED) ================= */}
+<div style={styles.profileBox}>
+
+  {/* LEFT SIDE */}
+  <div style={styles.profileLeft}>
+    
+    {/* PROFILE IMAGE */}
+    <img
+      src={worker.profileImage || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"}
+      alt="profile"
+      style={styles.profileImg}
+    />
+
+    {/* USER INFO */}
+    <div>
+      <h4 style={styles.profileName}>
+        👋 {worker.name || "Worker"}
+      </h4>
+
+      <p style={styles.profileSub}>
+        📍 {worker.city || "City"}, {worker.country || "Pakistan"}
+      </p>
+    </div>
+  </div>
+
+  {/* RIGHT SIDE (CIRCLE PROGRESS) */}
+  <div style={styles.circleBox}>
+    <div style={styles.circleWrapper}>
+  <svg width="70" height="70">
+    
+    {/* Background circle */}
+    <circle
+      cx="35"
+      cy="35"
+      r="30"
+      stroke="#eee"
+      strokeWidth="6"
+      fill="none"
+    />
+
+    {/* Progress circle */}
+    <circle
+      cx="35"
+      cy="35"
+      r="30"
+      stroke="#ff6a00"
+      strokeWidth="6"
+      fill="none"
+      strokeDasharray={2 * Math.PI * 30}
+      strokeDashoffset={
+        2 * Math.PI * 30 * (1 - completion / 100)
+      }
+      strokeLinecap="round"
+      transform="rotate(-90 35 35)"
+    />
+  </svg>
+
+  <div style={styles.circleText}>
+    {completion}%
+  </div>
+</div>
+    <p style={styles.small}>Profile</p>
+  </div>
+
+</div>
 
       {/* ================= WALLET CARD (NEW) ================= */}
-      <div style={styles.wallet}>
-        <h3>💰 Wallet</h3>
-        <h2>Rs {earnings}</h2>
-        <p>Total Earnings</p>
+      {/* ================= WALLET CARD (UPDATED PREMIUM) ================= */}
+<div style={styles.wallet}>
 
-        {/* <div style={styles.walletBtns}>
-          <button onClick={() => navigate("/worker/jobs")}>Find Jobs</button>
-          <button onClick={() => navigate("/worker/my-jobs")}>My Applications</button>
-          <button onClick={() => navigate("/worker/chat")}>Message</button>
-          <button onClick={() => navigate("/worker/earnings")}>Wallet</button>
-        </div> */}
-      </div>
+  {/* LEFT - WALLET BALANCE */}
+  <div style={styles.walletItem}>
+    <div style={styles.walletIcon}>👛</div>
+    <p style={styles.walletLabel}>Wallet Balance</p>
+    <h2 style={styles.walletValue}>Rs {earnings}</h2>
+  </div>
+
+  {/* DIVIDER */}
+  <div style={styles.walletDivider}></div>
+
+  {/* RIGHT - TOTAL EARNINGS */}
+  <div style={styles.walletItem}>
+    <div style={styles.walletIcon}>💰</div>
+    <p style={styles.walletLabel}>Total Earnings</p>
+    <h2 style={styles.walletValue}>Rs {earnings}</h2>
+  </div>
+
+</div>
 
       {/* ================= OLD HEADER (UNCHANGED) ================= */}
-      <div style={styles.header}>
+      {/* <div style={styles.header}>
         <div>
           <h2 style={styles.title}>Worker Dashboard</h2>
-          <p style={styles.subText}>Professional overview of your work</p>
+          
         </div>
-      </div>
+      </div> */}
 
       {/* ================= OLD STATS (UNCHANGED) ================= */}
       <div style={styles.grid}>
@@ -160,57 +235,156 @@ function ActionCard({ title, onClick }) {
 }
 
 /* ================= STYLES ================= */
+const isMobile = window.innerWidth < 768;
 const styles = {
-  container: { padding: 20, paddingBottom: 70 },
+  container: {
+    padding: isMobile ? "12px" : "20px",
+     paddingBottom: 70,
+     maxWidth: "1200px",
+    margin: "0 auto"
+     },
 
   topBar: {
-    display: "flex",
-    justifyContent: "space-between",
-    marginBottom: 10
-  },
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: "10px",
+  flexWrap: "wrap"
+},
 
-  topIcons: { 
-    display: "flex",
-     gap: 10 ,
-     cursor: "pointer"
-    },
+topLeft: {
+  display: "flex",
+  alignItems: "center"
+},
+
+title: {
+  margin: 0,
+  fontSize: isMobile ? "18px" : "28px",
+  fontWeight: "700",
+  color: "#ff6a00"   // 🔥 orange
+},
+
+topIcons: {
+  display: "flex",
+  gap: "10px",
+  cursor: "pointer",
+  fontSize: "18px"
+},
+
+icon: {
+  fontSize: "18px"
+},
 
   profileBox: {
-    marginBottom: 15
-  },
+  display: "flex",
+  flexDirection: isMobile ? "column" : "row",
+  justifyContent: "space-between",
+  alignItems: isMobile ? "flex-start" : "center",
+  padding: "15px",
+  borderRadius: "16px",
+  background: "#fff3e6", // 🔥 light orange
+  marginBottom: "15px",
+  boxShadow: "0 5px 20px rgba(255,106,0,0.1)"
+},
 
-  progress: {
-    height: 6,
-    background: "#eee",
-    borderRadius: 10
-  },
+profileLeft: {
+  display: "flex",
+  alignItems: "center",
+  gap: "12px"
+},
 
-  progressFill: {
-    height: "100%",
-    background: "#ff6a00",
-    borderRadius: 10
-  },
+profileImg: {
+  width: "55px",
+  height: "55px",
+  borderRadius: "50%",
+  objectFit: "cover",
+  border: "2px solid #ff6a00",
 
-  wallet: {
-    background: "#fff3e6",
-    padding: 15,
-    borderRadius: 12,
-    marginBottom: 20
-  },
+},
 
-  walletBtns: {
-    display: "grid",
-    gridTemplateColumns: "repeat(2,1fr)",
-    gap: 8
-  },
+profileName: {
+  margin: 0,
+  fontSize: "14px",
+  fontWeight: "600",
+  color: "#222"
+},
+
+profileSub: {
+  margin: 0,
+  fontSize: "12px",
+  color: "#666"
+},
+
+/* RIGHT SIDE CIRCLE */
+circleBox: {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center"
+},
+
+circleWrapper: {
+  position: "relative",
+  width: "70px",
+  height: "70px"
+},
+
+circleText: {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  fontSize: "14px",
+  fontWeight: "600",
+  color: "#ff6a00"
+},
+ wallet: {
+  flexDirection: isMobile ? "column" : "row",
+  background: "linear-gradient(135deg,#ff6a00,#ff9f1c)",
+  padding: "18px",
+  borderRadius: "16px",
+  marginBottom: "20px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  color: "#fff",
+  boxShadow: "0 10px 30px rgba(255,106,0,0.3)"
+},
+
+walletItem: {
+  flex: 1,
+  textAlign: "center"
+},
+
+walletIcon: {
+  fontSize: "22px",
+  marginBottom: "5px"
+},
+
+walletLabel: {
+  fontSize: "12px",
+  opacity: 0.9,
+  marginBottom: "4px"
+},
+
+walletValue: {
+  margin: 0,
+  fontSize: "18px",
+  fontWeight: "700"
+},
+
+walletDivider: {
+  width: "1px",
+  height: "50px",
+  background: "rgba(255,255,255,0.6)"
+},
 
   header: { marginBottom: 20 },
 
-  title: { color: "#ff6a00" },
+  // title: { color: "#ff6a00" },
 
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))",
+    gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(auto-fit,minmax(140px,1fr))",
     gap: 10
   },
 
@@ -222,7 +396,7 @@ const styles = {
 
   actions: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit,minmax(140px,1fr))",
+    gridTemplateColumns: isMobile ? "repeat(2,1fr)" : "repeat(auto-fit,minmax(140px,1fr))",
     gap: 10,
     marginTop: 20
   },
