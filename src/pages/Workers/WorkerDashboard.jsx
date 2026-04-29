@@ -65,11 +65,11 @@ const isMobile = window.innerWidth < 768;
     {/* USER INFO */}
     <div>
       <h4 style={styles.profileName}>
-        👋 {worker.name || "Worker"}
+        👋 {worker.name || "Fahad"}
       </h4>
 
       <p style={styles.profileSub}>
-        📍 {worker.city || "City"}, {worker.country || "Pakistan"}
+        📍 {worker.city || "Islamabad"}, {worker.country || "Pakistan"}
       </p>
     </div>
   </div>
