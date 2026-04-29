@@ -79,6 +79,10 @@ function ClientLayout() {
         <NavLink onClick={() => setOpen(false)} to="/client/profile" style={styles.link}>
           👤 Profile
         </NavLink>
+        {/* client-notification*/}
+        <NavLink onClick={() => setOpen(false)} to="/client/client-notification" style={styles.link}>
+          🔔 Notification
+        </NavLink>
 
         {/* SETTINGS (NEW PAGE ADDED) */}
         <NavLink onClick={() => setOpen(false)} to="/client/settings" style={styles.link}>
