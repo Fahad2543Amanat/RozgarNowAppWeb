@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-
+import { useState } from "react";
 function WorkerDashboard() {
   const navigate = useNavigate();
 
@@ -11,7 +11,7 @@ function WorkerDashboard() {
   const appliedJobs = myJobs.length;
   const completedJobs = myJobs.filter(j => j.status === "Completed").length;
   const activeJobs = myJobs.filter(j => j.status !== "Completed").length;
-
+  const [selectedJob, setSelectedJob] = useState(null);
   const completion = 85;
 const isMobile = window.innerWidth < 768;
   
@@ -163,42 +163,120 @@ const isMobile = window.innerWidth < 768;
         <ActionCard title="💰 Earnings" onClick={() => navigate("/worker/earnings")} />
       </div>
 
-      {/* ================= RECOMMENDED JOBS (UPGRADED) ================= */}
-      <div style={styles.section}>
-        <h3 style={styles.sectionTitle}>Recommended Jobs</h3>
+      {/* ================= RECOMMENDED JOBS (PREMIUM) ================= */}
+<div style={styles.section}>
+  <h3 style={styles.sectionTitle}>Recommended Jobs</h3>
 
-        {jobs.slice(0, 4).map(job => (
-          <div key={job.id} style={styles.recentCard}>
-            <h4 style={styles.jobTitle}>{job.title}</h4>
-            <p style={styles.desc}>{job.description}</p>
+  {jobs.slice(0, 4).map(job => (
+    <div key={job.id} style={styles.jobCard}>
 
-            <p style={styles.small}>💰 Salary: {job.budgetMin} - {job.budgetMax}</p>
-            <p style={styles.small}>📍 Distance: ~2km</p>
-
-            <div style={styles.row}>
-              <button onClick={() => navigate(`/worker/job/${job.id}`)}>View</button>
-              <button onClick={() => navigate("/worker/jobs")}>Apply</button>
-            </div>
-          </div>
-        ))}
+      <div style={styles.jobTop}>
+        <h4 style={styles.jobTitle}>{job.title}</h4>
+        <span style={styles.badge}>New</span>
       </div>
 
-      {/* ================= ACTIVE JOBS (NEW) ================= */}
-      <div style={styles.section}>
-        <h3 style={styles.sectionTitle}>Active Jobs</h3>
+      <p style={styles.desc}>{job.description}</p>
 
-        {myJobs.slice(0, 3).map(job => (
-          <div key={job.id} style={styles.recentCard}>
-            <h4 style={styles.jobTitle}>{job.title}</h4>
-            <p style={styles.small}>Start: {job.startDate || "N/A"}</p>
-            <p style={styles.small}>Status: {job.status}</p>
-
-            <div style={styles.progress}>
-              <div style={{ ...styles.progressFill, width: "50%" }} />
-            </div>
-          </div>
-        ))}
+      <div style={styles.metaRow}>
+        <span>💰 {job.budgetMin} - {job.budgetMax}</span>
+        <span>📍 ~2km</span>
       </div>
+
+      <div style={styles.jobActions}>
+        <button
+  onClick={() => setSelectedJob(job)}
+  style={styles.viewBtn}
+>
+  View Details
+</button>
+
+        <button
+          onClick={() => navigate("/worker/jobs")}
+          style={styles.applyBtn}
+        >
+          Apply Now
+        </button>
+      </div>
+
+    </div>
+  ))}
+</div>
+
+{/* ================= ACTIVE JOBS (PREMIUM) ================= */}
+<div style={styles.section}>
+  <h3 style={styles.sectionTitle}>Active Jobs</h3>
+
+  {myJobs.slice(0, 3).map(job => (
+    <div key={job.id} style={styles.jobCard}>
+
+      <div style={styles.jobTop}>
+        <h4 style={styles.jobTitle}>{job.title}</h4>
+        <span style={styles.status}>{job.status}</span>
+      </div>
+
+      <p style={styles.small}>Start Date: {job.startDate || "N/A"}</p>
+
+      {/* progress */}
+      <div style={styles.progress}>
+        <div
+          style={{
+            ...styles.progressFill,
+            width: job.status === "Completed" ? "100%" : "50%"
+          }}
+        />
+      </div>
+
+    </div>
+  ))}
+  {selectedJob && (
+  <div style={styles.modalOverlay} onClick={() => setSelectedJob(null)}>
+
+    <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+
+      {/* HEADER */}
+      <div style={styles.modalHeader}>
+        <h3 style={{ margin: 0, color: "#ff6a00" }}>
+          {selectedJob.title}
+        </h3>
+
+        <span style={{ cursor: "pointer" }} onClick={() => setSelectedJob(null)}>
+          ❌
+        </span>
+      </div>
+
+      {/* CONTENT */}
+      <div style={styles.modalBody}>
+
+        <p><b>Description:</b> {selectedJob.description}</p>
+
+        <p><b>Budget:</b> {selectedJob.budgetMin} - {selectedJob.budgetMax}</p>
+
+        <p><b>Location:</b> {selectedJob.location || "Not specified"}</p>
+
+        <p><b>Type:</b> {selectedJob.type || "Normal Job"}</p>
+
+        <p><b>Posted:</b> {selectedJob.createdAt || "Recently"}</p>
+
+      </div>
+
+      {/* ACTIONS */}
+      <div style={styles.modalActions}>
+        <button
+          style={styles.applyBtn}
+          onClick={() => {
+            navigate("/worker/jobs");
+            setSelectedJob(null);
+          }}
+        >
+          Apply Now
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+)}
+</div>
 
       {/* ================= BOTTOM NAV (MOBILE ONLY) ================= */}
       {isMobile && (
@@ -212,7 +290,10 @@ const isMobile = window.innerWidth < 768;
       )}
 
     </div>
+
+    
   );
+  
 }
 
 /* ================= REUSABLE ================= */
@@ -241,7 +322,8 @@ const styles = {
     padding: isMobile ? "12px" : "20px",
      paddingBottom: 70,
      maxWidth: "1200px",
-    margin: "0 auto"
+    margin: "0 auto",
+    backgroundColor :'#fff'
      },
 
   topBar: {
@@ -277,9 +359,9 @@ icon: {
 
   profileBox: {
   display: "flex",
-  flexDirection: isMobile ? "column" : "row",
+  flexDirection:  "row",
   justifyContent: "space-between",
-  alignItems: isMobile ? "flex-start" : "center",
+  alignItems:  "center",
   padding: "15px",
   borderRadius: "16px",
   background: "#fff3e6", // 🔥 light orange
@@ -338,7 +420,7 @@ circleText: {
   color: "#ff6a00"
 },
  wallet: {
-  flexDirection: isMobile ? "column" : "row",
+  flexDirection:  "row",
   background: "linear-gradient(135deg,#ff6a00,#ff9f1c)",
   padding: "18px",
   borderRadius: "16px",
@@ -391,7 +473,8 @@ walletDivider: {
   card: {
     background: "#fff",
     padding: 15,
-    borderRadius: 10
+    borderRadius: 10,
+    boxShadow: "0 10px 30px rgba(255,106,0,0.3)"
   },
 
   actions: {
@@ -407,7 +490,8 @@ walletDivider: {
     padding: 15,
     borderRadius: 10,
     textAlign: "center",
-    cursor: "pointer"
+    cursor: "pointer",
+    boxShadow: "0 10px 30px rgba(255,106,0,0.3)"
   },
 
   section: { marginTop: 20 },
@@ -418,12 +502,92 @@ walletDivider: {
     padding: 12,
     background: "#fff",
     borderRadius: 10,
-    marginBottom: 10
+    marginBottom: 10,
+    boxShadow: "0 10px 30px rgba(255,106,0,0.3)"
   },
+  jobCard: {
+  background: "linear-gradient(135deg, #fff, #fff8f2)",
+  border: "1px solid #ffe0cc",
+  borderRadius: "16px",
+  padding: "14px",
+  marginBottom: "12px",
+  boxShadow: "0 8px 20px rgba(255,106,0,0.08)",
+  transition: "0.2s"
+},
 
-  jobTitle: { color: "#ff6a00" },
+jobTop: {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center"
+},
 
-  desc: { fontSize: 12 },
+jobTitle: {
+  margin: 0,
+  fontSize: "15px",
+  fontWeight: "700",
+  color: "#ff6a00"
+},
+
+badge: {
+  fontSize: "10px",
+  padding: "4px 8px",
+  background: "#ff6a00",
+  color: "#fff",
+  borderRadius: "20px"
+},
+
+status: {
+  fontSize: "11px",
+  padding: "4px 8px",
+  background: "#fff3e6",
+  color: "#ff6a00",
+  borderRadius: "20px"
+},
+
+desc: {
+  fontSize: "12px",
+  color: "#555",
+  marginTop: "6px"
+},
+
+metaRow: {
+  display: "flex",
+  justifyContent: "space-between",
+  fontSize: "12px",
+  color: "#666",
+  marginTop: "8px"
+},
+
+jobActions: {
+  display: "flex",
+  gap: "10px",
+  marginTop: "12px"
+},
+
+viewBtn: {
+  flex: 1,
+  padding: "8px",
+  borderRadius: "10px",
+  border: "1px solid #ff6a00",
+  background: "#fff",
+  color: "#ff6a00",
+  fontSize: "12px",
+  cursor: "pointer"
+},
+
+applyBtn: {
+  flex: 1,
+  padding: "8px",
+  borderRadius: "10px",
+  border: "none",
+  background: "linear-gradient(90deg,#ff6a00,#ff9f1c)",
+  color: "#fff",
+  fontSize: "12px",
+  cursor: "pointer"
+},
+  // jobTitle: { color: "#ff6a00" },
+
+  //desc: { fontSize: 12 },
 
   small: { fontSize: 12, color: "#666" },
 
@@ -443,7 +607,50 @@ walletDivider: {
     background: "#fff",
     padding: 10,
     borderTop: "1px solid #eee"
-  }
+  },
+  modalOverlay: {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100%",
+  height: "100%",
+  background: "rgba(0,0,0,0.5)",
+  display: "flex",
+  justifyContent: "center",
+   alignItems: "center",   // 🔥 mobile bottom sheet feel
+  //  padding: "15px", 
+   zIndex: 99999,
+},
+
+modal: {
+  width: "90%",
+  maxWidth: "420px",
+  background: "#fff",
+  borderRadius: "20px",
+  padding: "15px",
+  animation: "slideUp 0.3s ease",
+  maxHeight: "80vh",
+  overflowY: "auto"
+},
+
+modalHeader: {
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  borderBottom: "1px solid #eee",
+  paddingBottom: "10px"
+},
+
+modalBody: {
+  padding: "10px 0",
+  fontSize: "clamp(12px, 3.5vw, 14px)",
+  color: "#444",
+  lineHeight: "1.6"
+},
+
+modalActions: {
+  marginTop: "10px"
+}
 };
 
 export default WorkerDashboard;
