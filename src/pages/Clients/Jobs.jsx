@@ -11,7 +11,7 @@ function Jobs() {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
 
-  const [selectedJobs, setSelectedJobs] = useState([]);
+  // const [selectedJobs, setSelectedJobs] = useState([]);
   const [pinned, setPinned] = useState([]);
 
   const saveJobs = (updated) => {
