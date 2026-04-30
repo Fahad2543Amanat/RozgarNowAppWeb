@@ -11,6 +11,9 @@ function Jobs() {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
 
+  const [selectedJobs, setSelectedJobs] = useState([]);
+  const [pinned, setPinned] = useState([]);
+
   const saveJobs = (updated) => {
     setJobs(updated);
     localStorage.setItem("jobs", JSON.stringify(updated));
@@ -23,7 +26,7 @@ function Jobs() {
 
   const updateStatus = (id, status) => {
     const updated = jobs.map(j =>
-      j.id === id ? { ...j, status } : j
+      j.id === id ? { ...j, status, updatedAt: Date.now() } : j
     );
     saveJobs(updated);
   };
@@ -35,10 +38,18 @@ function Jobs() {
 
   const saveEdit = () => {
     const updated = jobs.map(j =>
-      j.id === editingId ? editForm : j
+      j.id === editingId ? { ...editForm, updatedAt: Date.now() } : j
     );
     saveJobs(updated);
     setEditingId(null);
+  };
+
+  const togglePin = (id) => {
+    setPinned(prev =>
+      prev.includes(id)
+        ? prev.filter(p => p !== id)
+        : [...prev, id]
+    );
   };
 
   const filtered = jobs.filter(job => {
@@ -47,12 +58,18 @@ function Jobs() {
     return matchSearch && matchFilter;
   });
 
+  const sortedJobs = [...filtered].sort((a, b) => {
+    const aPinned = pinned.includes(a.id) ? 1 : 0;
+    const bPinned = pinned.includes(b.id) ? 1 : 0;
+    return bPinned - aPinned;
+  });
+
   return (
     <div style={styles.container}>
 
       {/* HEADER */}
       <div style={styles.header}>
-        <h2 style={{ margin: 0 }}>📦 Jobs</h2>
+        <h2 style={{ margin: 0 }}>📦 Jobs Management</h2>
       </div>
 
       {/* CONTROLS */}
@@ -77,229 +94,242 @@ function Jobs() {
       </div>
 
       {/* LIST */}
-      {filtered.map(job => (
+      {sortedJobs.map(job => (
         <div key={job.id} style={styles.card}>
 
-          {editingId === job.id ? (
-            <>
-              {/* EDIT MODE */}
+          {/* TOP */}
+          <div style={styles.topRow}>
+            <h3 style={styles.title}>
+              {job.title} {pinned.includes(job.id) && "📌"}
+            </h3>
+
+            <span style={{
+              ...styles.badge,
+              background:
+                job.status === "Completed"
+                  ? "#16a34a"
+                  : job.status === "Active"
+                  ? "#ff7a00"
+                  : "#f59e0b"
+            }}>
+              {job.status}
+            </span>
+          </div>
+
+          <p style={styles.desc}>{job.description}</p>
+
+          {/* INFO */}
+          <div style={styles.info}>
+            <span>💰 {job.budgetMin} - {job.budgetMax}</span>
+            <span>⏳ {job.deadline}</span>
+            <span>🔥 {job.priority}</span>
+          </div>
+
+          {/* ACTIONS (FIXED SPACING + SOFT COLORS) */}
+          <div style={styles.actions}>
+
+            <button onClick={() => updateStatus(job.id, "Active")} style={styles.btnOrange}>
+              Active
+            </button>
+
+            <button onClick={() => updateStatus(job.id, "Completed")} style={styles.btnGreen}>
+              Complete
+            </button>
+
+            <button onClick={() => togglePin(job.id)} style={styles.btnBlue}>
+              Pin
+            </button>
+
+            <button onClick={() => startEdit(job)} style={styles.btnSoftBlue}>
+              Edit
+            </button>
+
+            <button onClick={() => deleteJob(job.id)} style={styles.btnSoftRed}>
+              Delete
+            </button>
+
+          </div>
+
+          {/* EDIT MODE (FIXED ALIGNMENT) */}
+          {editingId === job.id && (
+            <div style={styles.editBox}>
+
               <input
                 value={editForm.title}
-                onChange={(e)=>setEditForm({...editForm, title:e.target.value})}
+                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
                 style={styles.input}
+                placeholder="Job Title"
               />
 
               <textarea
                 value={editForm.description}
-                onChange={(e)=>setEditForm({...editForm, description:e.target.value})}
+                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                 style={styles.textarea}
+                placeholder="Description"
               />
 
               <div style={styles.grid2}>
                 <input
                   value={editForm.budgetMin}
-                  onChange={(e)=>setEditForm({...editForm, budgetMin:e.target.value})}
-                  placeholder="Min Budget"
+                  onChange={(e) => setEditForm({ ...editForm, budgetMin: e.target.value })}
                   style={styles.input}
+                  placeholder="Min Budget"
                 />
 
                 <input
                   value={editForm.budgetMax}
-                  onChange={(e)=>setEditForm({...editForm, budgetMax:e.target.value})}
-                  placeholder="Max Budget"
+                  onChange={(e) => setEditForm({ ...editForm, budgetMax: e.target.value })}
                   style={styles.input}
+                  placeholder="Max Budget"
                 />
               </div>
 
-              <input
-                type="date"
-                value={editForm.deadline}
-                onChange={(e)=>setEditForm({...editForm, deadline:e.target.value})}
-                style={styles.input}
-              />
-
               <div style={styles.actions}>
-                <button onClick={saveEdit} style={styles.btnPrimary}>
-                  Save
-                </button>
-
-                <button onClick={()=>setEditingId(null)} style={styles.btnDanger}>
-                  Cancel
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              {/* VIEW MODE */}
-              <div style={styles.topRow}>
-                <h3 style={styles.title}>{job.title}</h3>
-
-                <span style={styles.badge}>{job.status}</span>
+                <button onClick={saveEdit} style={styles.btnOrange}>Save</button>
+                <button onClick={() => setEditingId(null)} style={styles.btnSoftRed}>Cancel</button>
               </div>
 
-              <p style={styles.desc}>{job.description}</p>
-
-              <div style={styles.infoGrid}>
-                <div>💰 {job.budgetMin} - {job.budgetMax}</div>
-                <div>⏳ {job.deadline}</div>
-                <div>🧠 {job.skills}</div>
-                <div>🔥 {job.priority}</div>
-              </div>
-
-              <div style={styles.actions}>
-                <button onClick={()=>updateStatus(job.id,"Active")} style={styles.btnPrimary}>
-                  Active
-                </button>
-
-                <button onClick={()=>updateStatus(job.id,"Completed")} style={styles.btnSuccess}>
-                  Complete
-                </button>
-
-                <button onClick={()=>startEdit(job)} style={styles.btnEdit}>
-                  Edit
-                </button>
-
-                <button onClick={()=>deleteJob(job.id)} style={styles.btnDanger}>
-                  Delete
-                </button>
-              </div>
-            </>
+            </div>
           )}
 
         </div>
       ))}
-
     </div>
   );
 }
 
-/* 🎨 RESPONSIVE UI */
+/* ================= STYLES ================= */
+
 const styles = {
   container: {
-    padding: "12px",
+    padding: 16,
     background: "#f9fafb",
     minHeight: "100vh",
     fontFamily: "Arial"
   },
 
-  header: {
-    marginBottom: "10px"
-  },
+  header: { marginBottom: 15 },
 
   controls: {
     display: "flex",
-    gap: "10px",
-    flexWrap: "wrap",
-    marginBottom: "15px"
+    gap: 10,
+    marginBottom: 15,
+    flexWrap: "wrap"
   },
 
   input: {
     flex: 1,
-    minWidth: "140px",
-    padding: "12px",
-    borderRadius: "10px",
-    border: "1px solid #eee",
+    padding: 10,
+    borderRadius: 10,
+    border: "1px solid #e5e7eb",
     background: "#fff"
   },
 
   textarea: {
     width: "100%",
-    padding: "12px",
-    borderRadius: "10px",
-    border: "1px solid #eee",
-    minHeight: "80px"
+    padding: 10,
+    borderRadius: 10,
+    border: "1px solid #e5e7eb",
+    marginTop: 8
   },
 
   card: {
     background: "#fff",
-    padding: "14px",
-    borderRadius: "12px",
-    marginBottom: "12px",
-    boxShadow: "0 5px 20px rgba(0,0,0,0.05)"
+    padding: 14,
+    borderRadius: 14,
+    marginBottom: 12,
+    boxShadow: "0 8px 20px rgba(0,0,0,0.06)"
   },
 
   topRow: {
     display: "flex",
     justifyContent: "space-between",
-    flexWrap: "wrap",
-    gap: "10px",
     alignItems: "center"
   },
 
-  title: {
-    margin: 0,
-    fontSize: "16px"
-  },
+  title: { margin: 0 },
 
-  desc: {
-    color: "#666",
-    fontSize: "14px"
-  },
+  desc: { color: "#6b7280", fontSize: 13 },
 
-  infoGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
-    gap: "8px",
-    fontSize: "13px",
-    marginTop: "10px",
-    color: "#444"
-  },
-
-  badge: {
-    background: "#ff6a00",
-    color: "white",
-    padding: "5px 10px",
-    borderRadius: "20px",
-    fontSize: "12px"
+  info: {
+    display: "flex",
+    gap: 12,
+    fontSize: 12,
+    marginTop: 8,
+    color: "#374151"
   },
 
   actions: {
     display: "flex",
     flexWrap: "wrap",
-    gap: "8px",
-    marginTop: "12px"
+    gap: 10,   // ✔ FIXED GAP
+    marginTop: 12
+  },
+
+  editBox: {
+    marginTop: 12,
+    display: "flex",
+    flexDirection: "column",
+    gap: 10
   },
 
   grid2: {
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
-    gap: "8px"
+    gap: 10
   },
 
-  btnPrimary: {
-    background: "#ff6a00",
-    color: "white",
-    border: "none",
-    padding: "10px",
-    borderRadius: "8px",
-    flex: 1
+  badge: {
+    padding: "4px 10px",
+    borderRadius: 20,
+    color: "#fff",
+    fontSize: 11
   },
 
-  btnSuccess: {
-    background: "#22c55e",
-    color: "white",
+  /* SOFT PREMIUM COLORS */
+  btnOrange: {
+    background: "#ff7a00",
+    color: "#fff",
     border: "none",
-    padding: "10px",
-    borderRadius: "8px",
-    flex: 1
+    padding: "8px 12px",
+    borderRadius: 8,
+    cursor: "pointer"
   },
 
-  btnEdit: {
-    background: "#3b82f6",
-    color: "white",
+  btnGreen: {
+    background: "#16a34a",
+    color: "#fff",
     border: "none",
-    padding: "10px",
-    borderRadius: "8px",
-    flex: 1
+    padding: "8px 12px",
+    borderRadius: 8,
+    cursor: "pointer"
   },
 
-  btnDanger: {
-    background: "#ef4444",
-    color: "white",
+  btnBlue: {
+    background: "#2563eb",
+    color: "#fff",
     border: "none",
-    padding: "10px",
-    borderRadius: "8px",
-    flex: 1
+    padding: "8px 12px",
+    borderRadius: 8,
+    cursor: "pointer"
+  },
+
+  btnSoftBlue: {
+    background: "#eff6ff",
+    color: "#2563eb",
+    border: "1px solid #bfdbfe",
+    padding: "8px 12px",
+    borderRadius: 8,
+    cursor: "pointer"
+  },
+
+  btnSoftRed: {
+    background: "#fef2f2",
+    color: "#dc2626",
+    border: "1px solid #fecaca",
+    padding: "8px 12px",
+    borderRadius: 8,
+    cursor: "pointer"
   }
 };
 
