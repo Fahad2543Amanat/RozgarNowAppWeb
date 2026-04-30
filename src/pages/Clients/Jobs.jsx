@@ -72,7 +72,7 @@ function Jobs() {
         <h2 style={{ margin: 0 }}>📦 Jobs Management</h2>
       </div>
 
-      {/* CONTROLS */}
+      {/* SEARCH / FILTER */}
       <div style={styles.controls}>
         <input
           placeholder="Search jobs..."
@@ -93,7 +93,7 @@ function Jobs() {
         </select>
       </div>
 
-      {/* LIST */}
+      {/* JOB LIST */}
       {sortedJobs.map(job => (
         <div key={job.id} style={styles.card}>
 
@@ -125,7 +125,7 @@ function Jobs() {
             <span>🔥 {job.priority}</span>
           </div>
 
-          {/* ACTIONS (FIXED SPACING + SOFT COLORS) */}
+          {/* ACTIONS */}
           <div style={styles.actions}>
 
             <button onClick={() => updateStatus(job.id, "Active")} style={styles.btnOrange}>
@@ -150,7 +150,7 @@ function Jobs() {
 
           </div>
 
-          {/* EDIT MODE (FIXED ALIGNMENT) */}
+          {/* EDIT MODE */}
           {editingId === job.id && (
             <div style={styles.editBox}>
 
@@ -164,7 +164,7 @@ function Jobs() {
               <textarea
                 value={editForm.description}
                 onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                style={styles.textarea}
+                style={styles.input}
                 placeholder="Description"
               />
 
@@ -208,7 +208,9 @@ const styles = {
     fontFamily: "Arial"
   },
 
-  header: { marginBottom: 15 },
+  header: {
+    marginBottom: 15
+  },
 
   controls: {
     display: "flex",
@@ -219,18 +221,11 @@ const styles = {
 
   input: {
     flex: 1,
+    minWidth: "140px",
     padding: 10,
     borderRadius: 10,
     border: "1px solid #e5e7eb",
     background: "#fff"
-  },
-
-  textarea: {
-    width: "100%",
-    padding: 10,
-    borderRadius: 10,
-    border: "1px solid #e5e7eb",
-    marginTop: 8
   },
 
   card: {
@@ -238,22 +233,32 @@ const styles = {
     padding: 14,
     borderRadius: 14,
     marginBottom: 12,
-    boxShadow: "0 8px 20px rgba(0,0,0,0.06)"
+    boxShadow: "0 8px 20px rgba(0,0,0,0.06)",
+    overflow: "hidden"
   },
 
   topRow: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center"
+    alignItems: "center",
+    flexWrap: "wrap",
+    gap: 10
   },
 
-  title: { margin: 0 },
+  title: {
+    margin: 0,
+    fontSize: "16px"
+  },
 
-  desc: { color: "#6b7280", fontSize: 13 },
+  desc: {
+    color: "#6b7280",
+    fontSize: 13
+  },
 
   info: {
     display: "flex",
-    gap: 12,
+    flexWrap: "wrap",
+    gap: 10,
     fontSize: 12,
     marginTop: 8,
     color: "#374151"
@@ -262,7 +267,7 @@ const styles = {
   actions: {
     display: "flex",
     flexWrap: "wrap",
-    gap: 10,   // ✔ FIXED GAP
+    gap: 10,
     marginTop: 12
   },
 
@@ -275,7 +280,7 @@ const styles = {
 
   grid2: {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr",
+    gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
     gap: 10
   },
 
@@ -286,7 +291,7 @@ const styles = {
     fontSize: 11
   },
 
-  /* SOFT PREMIUM COLORS */
+  /* BUTTONS */
   btnOrange: {
     background: "#ff7a00",
     color: "#fff",
