@@ -26,7 +26,7 @@ function Jobs() {
       if (!user?._id) return;
 
       const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/job/client/${user._id}`
+        `${import.meta.env.VITE_API_URL}/job/client/all`
       );
 
       setJobs(res.data || []);
