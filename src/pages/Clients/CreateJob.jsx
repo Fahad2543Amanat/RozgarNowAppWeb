@@ -1,8 +1,8 @@
 import { useState } from "react";
-
+import axios from "axios";
 function CreateJob() {
   const today = new Date().toISOString().split("T")[0];
-
+  const user = JSON.parse(localStorage.getItem("user"));
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -39,7 +39,7 @@ const cities = [
 const [citySearch, setCitySearch] = useState("");
 
   const [error, setError] = useState("");
-
+  const [loading, setLoading] = useState(false);
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -74,37 +74,73 @@ const [citySearch, setCitySearch] = useState("");
     return true;
   };
 
-  const postJob = () => {
+ // ================= POST JOB (UPDATED BACKEND) =================
+  const postJob = async () => {
     if (!validate()) return;
 
-    const jobs = JSON.parse(localStorage.getItem("jobs")) || [];
+    setLoading(true);
 
-    const newJob = {
-      id: Date.now(),
-      ...form,
-      status: "Pending",
-      progress: 0,
-      createdAt: new Date().toLocaleString()
-    };
+    try {
+      const payload = {
+        clientId: user?.id, // 🔥 IMPORTANT (FOREIGN KEY TYPE LINK)
+        title: form.title,
+        description: form.description,
+        budgetMin: form.budgetMin,
+        budgetMax: form.budgetMax,
+        deadline: form.deadline,
+        time: form.time,
+        skills: form.skills,
+        location: form.location,
+        phone: form.phone,
+        category: form.category,
+        priority: form.priority,
+        notes: form.notes
+      };
 
-    localStorage.setItem("jobs", JSON.stringify([newJob, ...jobs]));
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/job/create`,
+        payload
+      );
 
-    setForm({
-      title: "",
-      description: "",
-      budgetMin: "",
-      budgetMax: "",
-      deadline: "",
-      time: "",
-      skills: "",
-      location: "",
-      phone: "",
-      category: "",
-      priority: "Medium",
-      notes: ""
-    });
+      console.log("JOB CREATED:", res.data);
 
-    alert("🔥 Job Posted Successfully!");
+      // ================= BACKUP LOCAL STORAGE (OLD LOGIC KEPT) =================
+      const jobs = JSON.parse(localStorage.getItem("jobs")) || [];
+
+      const newJob = {
+        id: Date.now(),
+        ...form,
+        status: "Pending",
+        progress: 0,
+        createdAt: new Date().toLocaleString(),
+        clientId: user?.id
+      };
+
+      localStorage.setItem("jobs", JSON.stringify([newJob, ...jobs]));
+
+      // reset form
+      setForm({
+        title: "",
+        description: "",
+        budgetMin: "",
+        budgetMax: "",
+        deadline: "",
+        time: "",
+        skills: "",
+        location: "",
+        phone: "",
+        category: "",
+        priority: "Medium",
+        notes: ""
+      });
+
+      alert("🔥 Job Posted Successfully!");
+    } catch (err) {
+      console.log("ERROR:", err.response?.data || err.message);
+      alert("Job posting failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   /* 🔍 FILTERED CITIES */
@@ -176,7 +212,7 @@ const [citySearch, setCitySearch] = useState("");
       </div>
 
       <button onClick={postJob} style={styles.button}>
-        Post Job
+        {loading ? "Posting..." : "Post Job"}
       </button>
 
     </div>
