@@ -26,6 +26,7 @@ import Earnings from "./pages/Workers/Earnings";
 import WorkerProfile from "./pages/Workers/WorkerProfile";
 import WorkerSettings from "./pages/Workers/WorkerSettings";
 import ClientNotifications from "./pages/Clients/ClientNotifications";
+import ClientBids from "./pages/Clients/ClientBids";
 
 
 
@@ -52,6 +53,7 @@ function App() {
           <Route path="reports" element={<Reports />} />
           <Route path="profile" element={<Profile />} />
           <Route path="client-notification" element={<ClientNotifications />} />
+          <Route path="clientbids" element={<ClientBids />} />
           <Route path="settings" element={<Settings />} />
         </Route>
 

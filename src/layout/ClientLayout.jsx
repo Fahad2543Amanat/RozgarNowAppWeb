@@ -59,6 +59,9 @@ function ClientLayout() {
         <NavLink onClick={() => setOpen(false)} to="/client/jobs" style={styles.link}>
           📦 Jobs
         </NavLink>
+        <NavLink onClick={() => setOpen(false)} to="/client/clientbids" style={styles.link}>
+          📦 View Applications
+        </NavLink>
 
         {/* CREATE JOB */}
         <NavLink onClick={() => setOpen(false)} to="/client/create-job" style={styles.link}>

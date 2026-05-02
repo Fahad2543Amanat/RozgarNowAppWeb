@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from "react";
-
+import axios from "axios";
 function WorkerJobs() {
   const [jobs, setJobs] = useState([]);
   const [myJobs, setMyJobs] = useState([]);
@@ -10,18 +10,40 @@ function WorkerJobs() {
   const [selectedJob, setSelectedJob] = useState(null);
   const [bidAmount, setBidAmount] = useState("");
 
+   // ================= FETCH ALL JOBS FROM BACKEND =================
   useEffect(() => {
-    setJobs(JSON.parse(localStorage.getItem("jobs")) || []);
+    const loadJobs = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/job/all`
+        );
+
+        console.log("ALL JOBS:", res.data);
+
+        // ✅ IMPORTANT FIX
+        setJobs(res.data.data || []);
+
+      } catch (error) {
+        console.log("FETCH JOBS ERROR:", error);
+      }
+    };
+
+    loadJobs();
+
+    // 🟡 keep old logic for applied jobs
     setMyJobs(JSON.parse(localStorage.getItem("myJobs")) || []);
   }, []);
 
+   // ================= FILTER =================
   const filteredJobs = jobs.filter(job =>
-    job.title.toLowerCase().includes(search.toLowerCase())
+    (job.title || job.Title || "")
+      .toLowerCase()
+      .includes(search.toLowerCase())
   );
 
   // 🚀 OPEN MODAL
   const openBidModal = (job) => {
-    const exists = myJobs.find(j => j.id === job.id);
+    const exists = myJobs.find(j => j._id === job._id);
 
     if (exists) {
       alert("⚠ Already Applied");
@@ -32,9 +54,24 @@ function WorkerJobs() {
   };
 
   // 🚀 SUBMIT BID
-  const submitBid = () => {
-    if (!selectedJob) return;
+  const submitBid = async () => {
+  if (!selectedJob) return;
 
+  try {
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    const payload = {
+      jobId: selectedJob._id,
+      workerId: user.id,
+      amount: bidAmount || "Accept Range"
+    };
+
+    await axios.post(
+      `${import.meta.env.VITE_API_URL}/bid/create`,
+      payload
+    );
+
+    // ✅ OLD LOGIC (KEEP SAME)
     const newJob = {
       ...selectedJob,
       status: "Pending",
@@ -52,7 +89,12 @@ function WorkerJobs() {
     setBidAmount("");
 
     alert("✅ Applied Successfully");
-  };
+
+  } catch (error) {
+    console.log("BID ERROR:", error);
+    alert("❌ Failed to submit bid");
+  }
+};
 
   return (
     <div style={styles.container}>
@@ -69,18 +111,24 @@ function WorkerJobs() {
       />
 
       {/* JOB LIST */}
+      {/* JOB LIST */}
       <div style={styles.grid}>
 
         {filteredJobs.map(job => (
-          <div key={job.id} style={styles.card}>
+          <div key={job._id} style={styles.card}>
 
-            <h3 style={styles.jobTitle}>{job.title}</h3>
-            <p style={styles.desc}>{job.description}</p>
+            <h3 style={styles.jobTitle}>
+              {job.title || job.Title}
+            </h3>
+
+            <p style={styles.desc}>
+              {job.description || job.Description}
+            </p>
 
             <div style={styles.infoBox}>
-              👤 {job.clientName || "Client"} <br />
-              📍 {job.location || "Remote"} <br />
-              💰 {job.budgetMin} - {job.budgetMax}
+              👤 Client <br />
+              📍 {job.location || job.Location} <br />
+              💰 {job.budgetMin || job.BudgetMin} - {job.budgetMax || job.BudgetMax}
             </div>
 
             <button
@@ -102,10 +150,14 @@ function WorkerJobs() {
           <div style={styles.modal}>
 
             <h3>💼 Apply for Job</h3>
-            <p style={{ fontSize: "13px" }}>{selectedJob.title}</p>
+            <p style={{ fontSize: "13px" }}>
+              {selectedJob.title || selectedJob.Title}
+            </p>
 
             <div style={styles.rangeBox}>
-              💰 Market Range: {selectedJob.budgetMin} - {selectedJob.budgetMax}
+              💰 Market Range: 
+              {selectedJob.budgetMin || selectedJob.BudgetMin} - 
+              {selectedJob.budgetMax || selectedJob.BudgetMax}
             </div>
 
             <p style={{ fontSize: "12px", color: "#666" }}>
