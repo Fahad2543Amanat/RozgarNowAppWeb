@@ -14,6 +14,8 @@ function WorkerDashboard() {
   const [selectedJob, setSelectedJob] = useState(null);
   const completion = 85;
 const isMobile = window.innerWidth < 768;
+
+const user = JSON.parse(localStorage.getItem("user"));
   
   // 💰 Earnings (OLD LOGIC SAME)
   const earnings = myJobs
@@ -57,7 +59,7 @@ const isMobile = window.innerWidth < 768;
     
     {/* PROFILE IMAGE */}
     <img
-      src={worker.profileImage || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"}
+      src={user.ProfileImageUrl || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png"}
       alt="profile"
       style={styles.profileImg}
     />
@@ -65,11 +67,11 @@ const isMobile = window.innerWidth < 768;
     {/* USER INFO */}
     <div>
       <h4 style={styles.profileName}>
-        👋 {worker.name || "Fahad"}
+        👋 {user.name || "Fahad"}
       </h4>
 
       <p style={styles.profileSub}>
-        📍 {worker.city || "Islamabad"}, {worker.country || "Pakistan"}
+        📍 {user.city || "city"}, {worker.country || "Pakistan"}
       </p>
     </div>
   </div>
