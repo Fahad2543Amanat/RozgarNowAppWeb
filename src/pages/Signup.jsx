@@ -1,16 +1,23 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+// import { signupUser } from "../api/auth";
+import axios from "axios";
 function Signup() {
   const navigate = useNavigate();
 
   const [role, setRole] = useState("client");
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [businessDocFile, setBusinessDocFile] = useState(null);
+const [ntnFile, setNtnFile] = useState(null);
+const [logoFile, setLogoFile] = useState(null);
+const [profileImageFile, setProfileImage] = useState(null);
+const [cnicFrontFile, setCnicFrontFile] = useState(null);
+const [cnicBackFile, setCnicBackFile] = useState(null);
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-  
+  const API = import.meta.env.VITE_API_URL;
 
   /* ================= COMMON ================= */
   const [password, setPassword] = useState("");
@@ -208,23 +215,97 @@ const validateStep4 = () => {
   return Object.keys(err).length === 0;
 };
 
-  const handleSubmit = () => {
+//   const handleSubmit = () => {
+//   if (!validate()) return;
+
+//   setLoading(true);
+
+//   setTimeout(() => {
+//     localStorage.setItem("role", role);
+
+//     if (role === "worker") {
+//       localStorage.setItem("workerData", JSON.stringify(worker));
+//     } else {
+//       localStorage.setItem("clientData", JSON.stringify(client));
+//     }
+
+//     setLoading(false);
+//     navigate(role === "client" ? "/client" : "/worker");
+//   }, 800);
+// };
+const handleSubmit = async () => {
   if (!validate()) return;
 
   setLoading(true);
 
-  setTimeout(() => {
-    localStorage.setItem("role", role);
+  try {
+    const formData = new FormData();
 
-    if (role === "worker") {
-      localStorage.setItem("workerData", JSON.stringify(worker));
-    } else {
-      localStorage.setItem("clientData", JSON.stringify(client));
+    // ================= COMMON =================
+    formData.append("Name", role === "worker" ? worker.name : client.owner);
+    formData.append("Email", role === "worker"
+      ? (worker.phone + "@worker.com")
+      : (client.phone + "@client.com")
+    );
+
+    formData.append("Password", password);
+    formData.append("Role", role);
+    formData.append("Phone", role === "worker" ? worker.phone : client.phone);
+
+    // ================= CLIENT =================
+    if (role === "client") {
+      formData.append("Company", client.company);
+      formData.append("Category", client.category);
+      formData.append("Address", client.address);
+
+      // FILES (client)
+      if (logoFile) formData.append("logo", logoFile);
+      if (businessDocFile) formData.append("businessDoc", businessDocFile);
+      if (ntnFile) formData.append("ntn", ntnFile);
     }
 
-    setLoading(false);
+    // ================= WORKER =================
+    if (role === "worker") {
+      formData.append("Cnic", worker.cnic);
+      formData.append("City", worker.city);
+      formData.append("Experience", worker.experience);
+      formData.append("Location", worker.location);
+      formData.append("Radius", worker.radius);
+
+      // array convert
+      worker.skills.forEach(skill => {
+        formData.append("Skills", skill);
+      });
+
+      // FILES (worker)
+      if (profileImageFile) formData.append("profileImage", profileImageFile);
+      if (cnicFrontFile) formData.append("cnicFront", cnicFrontFile);
+      if (cnicBackFile) formData.append("cnicBack", cnicBackFile);
+    }
+
+    // ================= API CALL =================
+    const res = await axios.post(
+      `${API}/auth/signup`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      }
+    );
+
+    console.log("SUCCESS:", res.data);
+
+    alert("Account Created Successfully!");
+
     navigate(role === "client" ? "/client" : "/worker");
-  }, 800);
+
+  } catch (error) {
+    console.log("ERROR:", error.response?.data || error.message);
+    alert("Signup Failed");
+  } finally {
+    setLoading(false);
+  }
 };
 
   /* ================= UI ================= */
@@ -297,11 +378,17 @@ const validateStep4 = () => {
 
             <h4>Upload Documents</h4>
             <p style={styles.uploadfiletext}>Upload Logo Image <span style={{color:"red"}}>*</span></p>
-            <input type="file" style={styles.file}/>
+            <input type="file" style={styles.file}
+            onChange={(e) => setLogoFile(e.target.files[0])}
+            />
             <p style={styles.uploadfiletext}>Upload Business documents <span style={{color:"red"}}>*</span></p>
-            <input type="file" style={styles.file}/>
+            <input type="file" style={styles.file}
+            onChange={(e) => setBusinessDocFile(e.target.files[0])}
+            />
             <p style={styles.uploadfiletext}>Upload NTN(optional)</p>
-            <input type="file" style={styles.file}/>
+            <input type="file" style={styles.file}
+            onChange={(e) => setNtnFile(e.target.files[0])}
+            />
 
             {/* PASSWORD */}
             <div style={styles.passBox}>
@@ -467,9 +554,15 @@ const validateStep4 = () => {
       <>
         <h4>Upload Verification</h4>
 
-        <input type="file" style={styles.file} />
-        <input type="file" style={styles.file} />
-        <input type="file" style={styles.file} />
+        <input type="file" style={styles.file} 
+        onChange={(e) => setProfileImage(e.target.files[0])}
+        />
+        <input type="file" style={styles.file} 
+        onChange={(e) => setCnicFrontFile(e.target.files[0])}
+        />
+        <input type="file" style={styles.file} 
+        onChange={(e) => setCnicBackFile(e.target.files[0])}
+        />
 
         <div style={styles.row}>
           <button onClick={() => setStep(2)} style={styles.back}>
