@@ -8,6 +8,7 @@ function ClientDashboard() {
   const active = jobs.filter(j => j.status === "Active").length;
   const pending = jobs.filter(j => j.status === "Pending").length;
   const [toast, setToast] = useState("");
+  const user = JSON.parse(localStorage.getItem("user"));
   const navigate = useNavigate();
 
   const [notifications, setNotifications] = useState([
@@ -39,16 +40,31 @@ useEffect(() => {
   return () => window.removeEventListener("resize", handleResize);
 }, []);
 
+
+
   return (
     <div style={styles.container}>
 
       {/* ================= TOP BAR ================= */}
       <div style={styles.topBar}>
         <div style={styles.brand}>
-          <div style={styles.logo}>🟠</div>
+          <div style={styles.logo}>
+    {user?.logoUrl ? (
+      <img
+        src={`${import.meta.env.VITE_API_URL.replace("/api","")}/Uploads/${user.logoUrl}`}
+        style={{ width: 40, height: 40, borderRadius: "50%" }}
+      />
+    ) : (
+      "🟠"
+    )}
+  </div>
           <div>
-            <h3 style={{ margin: 0 }}>RozgarNow</h3>
-            <span style={styles.verified}>✔ Verified Company</span>
+            <h3 style={{ margin: 0 }}>
+            {user?.company || "Employer"}
+             </h3>
+            <span style={styles.verified}>{user?.verificationStatus === "Approved"
+        ? "✔ Verified Company"
+        : "⏳ Pending Verification"}</span>
           </div>
         </div>
 
@@ -115,7 +131,7 @@ useEffect(() => {
 }}>
   
   <div>
-    <h2 style={{ margin: 0 }}>Welcome Back 👋</h2>
+    <h2 style={{ margin: 0 }}>Welcome Back {user?.name}👋</h2>
     <p style={{ marginTop: 5, opacity: 0.9 }}>
       Manage jobs & hire skilled workers faster
     </p>

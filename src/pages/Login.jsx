@@ -49,15 +49,15 @@ function Login() {
   //   }, 700);
   // };
 
-  const handleLogin = async () => {
+ const handleLogin = async () => {
   if (!validate()) return;
 
   setLoading(true);
 
   try {
     const payload = {
-      phone: phone,
-      password: password
+      phone,
+      password
     };
 
     const res = await axios.post(
@@ -67,15 +67,16 @@ function Login() {
 
     console.log("LOGIN SUCCESS:", res.data);
 
-    // 🔥 save user data
-    localStorage.setItem("role", res.data.user.role);
-    localStorage.setItem("user", JSON.stringify(res.data.user));
-    localStorage.setItem("phone", res.data.user.phone);
+    const user = res.data.user;
+
+    // 🔥 SAVE FULL USER OBJECT (IMPORTANT)
+    localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem("role", user.role);
 
     alert(res.data.message);
 
-    // 🔥 redirect based on backend role (BEST PRACTICE)
-    if (res.data.user.role === "client") {
+    // redirect based on backend role
+    if (user.role === "client") {
       navigate("/client");
     } else {
       navigate("/worker");
