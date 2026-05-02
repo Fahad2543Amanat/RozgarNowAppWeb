@@ -75,7 +75,7 @@ useEffect(() => {
     style={styles.notify}
     onClick={() => setOpenNotif(!openNotif)}
   >
-    Version 1.0.1🔔
+    Version 1.0.2🔔
   </span>
 
   {/* BADGE */}
