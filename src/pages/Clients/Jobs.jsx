@@ -1,49 +1,78 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 function Jobs() {
-  const [jobs, setJobs] = useState(() => {
-    return JSON.parse(localStorage.getItem("jobs")) || [];
-  });
+  const user = JSON.parse(localStorage.getItem("user")); // 🔥 logged-in user (ONLY ONCE)
+
+  const [jobs, setJobs] = useState([]); // ❌ removed localStorage dependency
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
 
   const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({});
+  const [editForm, setEditForm] = useState({
+    title: "",
+    description: "",
+    budgetMin: "",
+    budgetMax: ""
+  });
 
-  // const [selectedJobs, setSelectedJobs] = useState([]);
   const [pinned, setPinned] = useState([]);
 
-  const saveJobs = (updated) => {
-    setJobs(updated);
-    localStorage.setItem("jobs", JSON.stringify(updated));
+  // ================= FETCH FROM BACKEND =================
+ useEffect(() => {
+  const loadJobs = async () => {
+    try {
+      if (!user?._id) return;
+
+      const res = await axios.get(
+        `${import.meta.env.VITE_API_URL}/job/client/${user._id}`
+      );
+
+      setJobs(res.data || []);
+
+    } catch (error) {
+      console.log("FETCH JOBS ERROR:", error);
+    }
   };
 
-  const deleteJob = (id) => {
-    const updated = jobs.filter(j => j.id !== id);
-    saveJobs(updated);
+  loadJobs();
+}, [user?._id]);
+  // ================= DELETE JOB =================
+  const deleteJob = async (id) => {
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/job/${id}`);
+
+      setJobs(prev => prev.filter(j => j._id !== id));
+    } catch (error) {
+      console.log(error);
+    }
   };
 
+  // ================= UPDATE STATUS =================
   const updateStatus = (id, status) => {
     const updated = jobs.map(j =>
-      j.id === id ? { ...j, status, updatedAt: Date.now() } : j
+      j._id === id ? { ...j, status } : j
     );
-    saveJobs(updated);
+    setJobs(updated);
   };
 
+  // ================= EDIT =================
   const startEdit = (job) => {
-    setEditingId(job.id);
+    setEditingId(job._id);
     setEditForm(job);
   };
 
   const saveEdit = () => {
     const updated = jobs.map(j =>
-      j.id === editingId ? { ...editForm, updatedAt: Date.now() } : j
+      j._id === editingId ? editForm : j
     );
-    saveJobs(updated);
+
+    setJobs(updated);
     setEditingId(null);
   };
 
+  // ================= PIN =================
   const togglePin = (id) => {
     setPinned(prev =>
       prev.includes(id)
@@ -52,15 +81,20 @@ function Jobs() {
     );
   };
 
+  // ================= FILTER + SEARCH =================
   const filtered = jobs.filter(job => {
-    const matchSearch = job.title.toLowerCase().includes(search.toLowerCase());
-    const matchFilter = filter === "All" ? true : job.status === filter;
+    const matchSearch =
+      job.title?.toLowerCase()?.includes(search.toLowerCase());
+
+    const matchFilter =
+      filter === "All" ? true : job.status === filter;
+
     return matchSearch && matchFilter;
   });
 
   const sortedJobs = [...filtered].sort((a, b) => {
-    const aPinned = pinned.includes(a.id) ? 1 : 0;
-    const bPinned = pinned.includes(b.id) ? 1 : 0;
+    const aPinned = pinned.includes(a._id) ? 1 : 0;
+    const bPinned = pinned.includes(b._id) ? 1 : 0;
     return bPinned - aPinned;
   });
 
@@ -95,12 +129,12 @@ function Jobs() {
 
       {/* JOB LIST */}
       {sortedJobs.map(job => (
-        <div key={job.id} style={styles.card}>
+        <div key={job._id} style={styles.card}>
 
           {/* TOP */}
           <div style={styles.topRow}>
             <h3 style={styles.title}>
-              {job.title} {pinned.includes(job.id) && "📌"}
+              {job.title} {pinned.includes(job._id) && "📌"}
             </h3>
 
             <span style={{
@@ -128,15 +162,15 @@ function Jobs() {
           {/* ACTIONS */}
           <div style={styles.actions}>
 
-            <button onClick={() => updateStatus(job.id, "Active")} style={styles.btnOrange}>
+            <button onClick={() => updateStatus(job._id, "Active")} style={styles.btnOrange}>
               Active
             </button>
 
-            <button onClick={() => updateStatus(job.id, "Completed")} style={styles.btnGreen}>
+            <button onClick={() => updateStatus(job._id, "Completed")} style={styles.btnGreen}>
               Complete
             </button>
 
-            <button onClick={() => togglePin(job.id)} style={styles.btnBlue}>
+            <button onClick={() => togglePin(job._id)} style={styles.btnBlue}>
               Pin
             </button>
 
@@ -144,41 +178,49 @@ function Jobs() {
               Edit
             </button>
 
-            <button onClick={() => deleteJob(job.id)} style={styles.btnSoftRed}>
+            <button onClick={() => deleteJob(job._id)} style={styles.btnSoftRed}>
               Delete
             </button>
 
           </div>
 
           {/* EDIT MODE */}
-          {editingId === job.id && (
+          {editingId === job._id && (
             <div style={styles.editBox}>
 
               <input
-                value={editForm.title}
-                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                value={editForm.title || ""}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, title: e.target.value })
+                }
                 style={styles.input}
                 placeholder="Job Title"
               />
 
               <textarea
-                value={editForm.description}
-                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                value={editForm.description || ""}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, description: e.target.value })
+                }
                 style={styles.input}
                 placeholder="Description"
               />
 
               <div style={styles.grid2}>
                 <input
-                  value={editForm.budgetMin}
-                  onChange={(e) => setEditForm({ ...editForm, budgetMin: e.target.value })}
+                  value={editForm.budgetMin || ""}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, budgetMin: e.target.value })
+                  }
                   style={styles.input}
                   placeholder="Min Budget"
                 />
 
                 <input
-                  value={editForm.budgetMax}
-                  onChange={(e) => setEditForm({ ...editForm, budgetMax: e.target.value })}
+                  value={editForm.budgetMax || ""}
+                  onChange={(e) =>
+                    setEditForm({ ...editForm, budgetMax: e.target.value })
+                  }
                   style={styles.input}
                   placeholder="Max Budget"
                 />
@@ -186,7 +228,9 @@ function Jobs() {
 
               <div style={styles.actions}>
                 <button onClick={saveEdit} style={styles.btnOrange}>Save</button>
-                <button onClick={() => setEditingId(null)} style={styles.btnSoftRed}>Cancel</button>
+                <button onClick={() => setEditingId(null)} style={styles.btnSoftRed}>
+                  Cancel
+                </button>
               </div>
 
             </div>
@@ -197,6 +241,8 @@ function Jobs() {
     </div>
   );
 }
+
+
 
 /* ================= STYLES ================= */
 
