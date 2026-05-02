@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import axios from "axios";
 function Login() {
   const navigate = useNavigate();
 
@@ -35,20 +35,59 @@ function Login() {
   };
 
   /* ================= LOGIN ================= */
-  const handleLogin = () => {
-    if (!validate()) return;
+  // const handleLogin = () => {
+  //   if (!validate()) return;
 
-    setLoading(true);
+  //   setLoading(true);
 
-    setTimeout(() => {
-      localStorage.setItem("role", role);
-      localStorage.setItem("phone", phone);
+  //   setTimeout(() => {
+  //     localStorage.setItem("role", role);
+  //     localStorage.setItem("phone", phone);
 
-      setLoading(false);
-      navigate(role === "client" ? "/client" : "/worker");
-    }, 700);
-  };
+  //     setLoading(false);
+  //     navigate(role === "client" ? "/client" : "/worker");
+  //   }, 700);
+  // };
 
+  const handleLogin = async () => {
+  if (!validate()) return;
+
+  setLoading(true);
+
+  try {
+    const payload = {
+      phone: phone,
+      password: password
+    };
+
+    const res = await axios.post(
+      `${import.meta.env.VITE_API_URL}/auth/login`,
+      payload
+    );
+
+    console.log("LOGIN SUCCESS:", res.data);
+
+    // 🔥 save user data
+    localStorage.setItem("role", res.data.user.role);
+    localStorage.setItem("user", JSON.stringify(res.data.user));
+    localStorage.setItem("phone", res.data.user.phone);
+
+    alert(res.data.message);
+
+    // 🔥 redirect based on backend role (BEST PRACTICE)
+    if (res.data.user.role === "client") {
+      navigate("/client");
+    } else {
+      navigate("/worker");
+    }
+
+  } catch (error) {
+    console.log("LOGIN ERROR:", error.response?.data || error.message);
+    alert(error.response?.data || "Login failed");
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div style={styles.container}>
       <div style={styles.card}>
