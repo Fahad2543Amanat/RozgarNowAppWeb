@@ -23,13 +23,15 @@ function Jobs() {
  useEffect(() => {
   const loadJobs = async () => {
     try {
-      if (!user?._id) return;
+      if (!user?.id) return;
 
       const res = await axios.get(
-        `${import.meta.env.VITE_API_URL}/job/client/all`
+        `${import.meta.env.VITE_API_URL}/job/client/${user.id}`
       );
 
-      setJobs(res.data || []);
+      console.log("JOBS API:", res.data);
+
+      setJobs(res.data.data || []);
 
     } catch (error) {
       console.log("FETCH JOBS ERROR:", error);
@@ -37,7 +39,7 @@ function Jobs() {
   };
 
   loadJobs();
-}, [user?._id]);
+}, [user?.id]);
   // ================= DELETE JOB =================
   const deleteJob = async (id) => {
     try {
