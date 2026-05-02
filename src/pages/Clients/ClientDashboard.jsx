@@ -51,7 +51,7 @@ useEffect(() => {
           <div style={styles.logo}>
     {user?.logoUrl ? (
       <img
-        src={`${import.meta.env.VITE_API_URL.replace("/api","")}/Uploads/${user.logoUrl}`}
+        src={`${import.meta.env.VITE_API_URL}/Uploads/${user.logoUrl}`}
         style={{ width: 40, height: 40, borderRadius: "50%" }}
       />
     ) : (
