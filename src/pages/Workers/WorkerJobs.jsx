@@ -55,47 +55,35 @@ function WorkerJobs() {
 
   // 🚀 SUBMIT BID
   const submitBid = async () => {
-  if (!selectedJob) return;
-
   try {
+    if (!selectedJob) return;
+
     const user = JSON.parse(localStorage.getItem("user"));
 
     const payload = {
-      jobId: selectedJob._id,
-      workerId: user.id,
-      amount: bidAmount || "Accept Range"
+      JobId: selectedJob._id,                      // ✅ correct case
+      ClientId: selectedJob.ClientId,              // ✅ FIX (important)
+      WorkerId: user.id || user.Id || user._id,    // ✅ safe handling
+      BidAmount: bidAmount || "Accept Range"       // ✅ FIX (IMPORTANT)
     };
+
+    console.log("BID PAYLOAD:", payload);
 
     await axios.post(
       `${import.meta.env.VITE_API_URL}/bid/create`,
       payload
     );
 
-    // ✅ OLD LOGIC (KEEP SAME)
-    const newJob = {
-      ...selectedJob,
-      status: "Pending",
-      progress: 0,
-      bid: bidAmount || "Accept Range",
-      appliedAt: new Date().toLocaleString()
-    };
-
-    const updated = [...myJobs, newJob];
-
-    localStorage.setItem("myJobs", JSON.stringify(updated));
-    setMyJobs(updated);
+    alert("✅ Bid Submitted Successfully");
 
     setSelectedJob(null);
     setBidAmount("");
 
-    alert("✅ Applied Successfully");
-
   } catch (error) {
-    console.log("BID ERROR:", error);
-    alert("❌ Failed to submit bid");
+    console.log("BID ERROR:", error.response?.data || error);
+    alert(error.response?.data || "Bid failed");
   }
 };
-
   return (
     <div style={styles.container}>
 
