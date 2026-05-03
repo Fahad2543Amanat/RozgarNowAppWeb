@@ -3,7 +3,7 @@ import axios from "axios";
 
 function ClientBids() {
 
-  // ✅ FIX: user ko state me store kiya (performance better)
+  // ✅ user state (same logic)
   const [user] = useState(() =>
     JSON.parse(localStorage.getItem("user"))
   );
@@ -15,7 +15,6 @@ function ClientBids() {
   useEffect(() => {
     const loadBids = async () => {
       try {
-        // ✅ FIX: loading stuck bug
         if (!user?.id) {
           setLoading(false);
           return;
@@ -42,7 +41,6 @@ function ClientBids() {
   // ================= UPDATE STATUS =================
   const updateStatus = async (bidId, status) => {
     try {
-      // ✅ FIX: proper body send for .NET
       await axios.put(
         `${import.meta.env.VITE_API_URL}/bid/update-status/${bidId}`,
         JSON.stringify(status),
@@ -51,10 +49,10 @@ function ClientBids() {
         }
       );
 
-      // ✅ OLD LOGIC SAME (UI update)
+      // ✅ keep old logic but FIX field names
       setBids(prev =>
         prev.map(b =>
-          b._id === bidId ? { ...b, status } : b
+          b.Id === bidId ? { ...b, Status: status } : b
         )
       );
 
@@ -71,70 +69,75 @@ function ClientBids() {
 
       <h2 style={styles.title}>📥 Job Applications</h2>
 
-      {/* ✅ IMPROVED EMPTY STATE */}
+      {/* EMPTY STATE */}
       {bids.length === 0 && !loading && (
         <p style={styles.empty}>🚫 No applications received yet</p>
       )}
 
       {bids.map(bid => (
         <div
-          key={bid._id}
+          key={bid.Id}
           style={styles.card}
-
-          // ✅ OPTIONAL hover effect
           onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.01)")}
           onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
         >
 
-          {/* ✅ IMPROVED DISPLAY */}
+          {/* 🔥 JOB DETAILS (NEW) */}
           <h3>
-            💼 Job: {bid.jobTitle || bid.jobId}
+            💼 {bid.Job?.Title || "No Title"}
           </h3>
 
+          <p>📍 {bid.Job?.Location || "No Location"}</p>
+
           <p>
-            👷 Worker: {bid.workerName || bid.workerId}
+            💰 Budget: {bid.Job?.BudgetMin} - {bid.Job?.BudgetMax}
           </p>
 
-          <p>💰 Bid Amount: {bid.amount}</p>
+          {/* WORKER */}
+          <p>
+           👷 {bid.Worker?.Name || "Unknown Worker"}
+          </p>
 
+          {/* BID */}
+          <p>💰 Your Bid: {bid.BidAmount}</p>
+
+          {/* STATUS */}
           <p>
             Status:
             <span style={{
               marginLeft: 10,
               fontWeight: "bold",
               color:
-                bid.status === "Accepted"
+                bid.Status === "Accepted"
                   ? "#16a34a"
-                  : bid.status === "Rejected"
+                  : bid.Status === "Rejected"
                   ? "#dc2626"
                   : "#f59e0b"
             }}>
-              {bid.status}
+              {bid.Status}
             </span>
           </p>
 
-          {/* ACTION BUTTONS */}
+          {/* ACTIONS */}
           <div style={styles.actions}>
 
-            {/* ✅ FIX: disable if already accepted */}
             <button
-              disabled={bid.status === "Accepted"}
-              onClick={() => updateStatus(bid._id, "Accepted")}
+              disabled={bid.Status === "Accepted"}
+              onClick={() => updateStatus(bid.Id, "Accepted")}
               style={{
                 ...styles.accept,
-                opacity: bid.status === "Accepted" ? 0.6 : 1
+                opacity: bid.Status === "Accepted" ? 0.6 : 1
               }}
             >
               Accept
             </button>
 
-            {/* ✅ FIX: disable if already rejected */}
             <button
-              disabled={bid.status === "Rejected"}
-              onClick={() => updateStatus(bid._id, "Rejected")}
+              disabled={bid.Status === "Rejected"}
+              onClick={() => updateStatus(bid.Id, "Rejected")}
               style={{
                 ...styles.reject,
-                opacity: bid.status === "Rejected" ? 0.6 : 1
+                opacity: bid.Status === "Rejected" ? 0.6 : 1
               }}
             >
               Reject
