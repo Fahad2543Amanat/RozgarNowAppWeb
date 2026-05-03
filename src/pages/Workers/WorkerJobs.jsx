@@ -53,31 +53,78 @@ function WorkerJobs() {
     setSelectedJob(job);
   };
 
-  const submitBid = async () => {
+//   const submitBid = async () => {
+//   try {
+//     if (!selectedJob) return;
+
+//     const user = JSON.parse(localStorage.getItem("user"));
+
+//     console.log("SELECTED JOB:", selectedJob);
+
+//     const payload = {
+//       // 🔥 EXISTING
+//       JobId: selectedJob.id,
+//       ClientId: selectedJob.clientId,
+//       WorkerId: user.id || user._id,
+//       BidAmount: bidAmount || "Accept Range",
+
+//       // 🔥 NEW DATA (IMPORTANT)
+//       JobTitle: selectedJob.title,
+//       BudgetMin: selectedJob.budgetMin,
+//       BudgetMax: selectedJob.budgetMax,
+
+//       WorkerName: user.name || user.fullName || "Worker",
+//       WorkerLocation: user.location || "Unknown"
+//     };
+
+//     console.log("BID PAYLOAD:", payload);
+
+//     await axios.post(
+//       `${import.meta.env.VITE_API_URL}/bid/create`,
+//       payload
+//     );
+
+//     alert("✅ Bid Submitted Successfully");
+
+//     setSelectedJob(null);
+//     setBidAmount("");
+
+//   } catch (error) {
+//     console.log("BID ERROR:", error.response?.data || error);
+//     alert(
+//       error.response?.data?.message ||
+//       JSON.stringify(error.response?.data) ||
+//       "Bid failed"
+//     );
+//   }
+// };
+const submitBid = async () => {
   try {
     if (!selectedJob) return;
 
     const user = JSON.parse(localStorage.getItem("user"));
 
     console.log("SELECTED JOB:", selectedJob);
+    console.log("USER:", user);
 
     const payload = {
-      // 🔥 EXISTING
+      // 🔥 REQUIRED (exact same as backend model)
       JobId: selectedJob.id,
       ClientId: selectedJob.clientId,
       WorkerId: user.id || user._id,
+
       BidAmount: bidAmount || "Accept Range",
 
-      // 🔥 NEW DATA (IMPORTANT)
-      JobTitle: selectedJob.title,
-      BudgetMin: selectedJob.budgetMin,
-      BudgetMax: selectedJob.budgetMax,
+      // 🔥 NEW REQUIRED FIELDS
+      JobTitle: selectedJob.title,          // ✅ FIX
+      BudgetMin: selectedJob.budgetMin,     // ✅ FIX
+      BudgetMax: selectedJob.budgetMax,     // ✅ FIX
 
-      WorkerName: user.name || user.fullName || "Worker",
-      WorkerLocation: user.location || "Unknown"
+      WorkerName: user.name || user.username || "Worker",   // ✅ FIX
+      WorkerLocation: user.location || "Pakistan"           // ✅ FIX
     };
 
-    console.log("BID PAYLOAD:", payload);
+    console.log("FINAL PAYLOAD:", payload);
 
     await axios.post(
       `${import.meta.env.VITE_API_URL}/bid/create`,
@@ -90,12 +137,8 @@ function WorkerJobs() {
     setBidAmount("");
 
   } catch (error) {
-    console.log("BID ERROR:", error.response?.data || error);
-    alert(
-      error.response?.data?.message ||
-      JSON.stringify(error.response?.data) ||
-      "Bid failed"
-    );
+    console.log("BID ERROR FULL:", error.response?.data);
+    alert(JSON.stringify(error.response?.data));
   }
 };
   return (
