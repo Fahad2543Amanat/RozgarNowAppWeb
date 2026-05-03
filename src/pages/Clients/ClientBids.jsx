@@ -83,23 +83,17 @@ function ClientBids() {
         >
 
           {/* 🔥 JOB DETAILS (NEW) */}
-          <h3>
-            💼 {bid.Job?.Title || "No Title"}
-          </h3>
+          <h3>💼 {bid.JobTitle}</h3>
 
-          <p>📍 {bid.Job?.Location || "No Location"}</p>
+          <p>👷 {bid.WorkerName}</p>
 
-          <p>
-            💰 Budget: {bid.Job?.BudgetMin} - {bid.Job?.BudgetMax}
-          </p>
+            <p>📍 {bid.WorkerLocation}</p>
 
-          {/* WORKER */}
-          <p>
-           👷 {bid.Worker?.Name || "Unknown Worker"}
-          </p>
+            <p>
+              💰 Budget: {bid.BudgetMin} - {bid.BudgetMax}
+            </p>
 
-          {/* BID */}
-          <p>💰 Your Bid: {bid.BidAmount}</p>
+            <p>💸 Bid: {bid.BidAmount}</p>
 
           {/* STATUS */}
           <p>

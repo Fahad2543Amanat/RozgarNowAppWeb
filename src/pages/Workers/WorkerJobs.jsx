@@ -53,10 +53,8 @@ function WorkerJobs() {
     setSelectedJob(job);
   };
 
-  // 🚀 SUBMIT BID
   const submitBid = async () => {
   try {
-    
     if (!selectedJob) return;
 
     const user = JSON.parse(localStorage.getItem("user"));
@@ -64,11 +62,21 @@ function WorkerJobs() {
     console.log("SELECTED JOB:", selectedJob);
 
     const payload = {
-      JobId: selectedJob.id,              // ✅ FIXED
-      ClientId: selectedJob.clientId,     // ✅ FIXED
-      WorkerId: user.id || user._id,      // ✅ OK
-      BidAmount: bidAmount || "Accept Range"
+      // 🔥 EXISTING
+      JobId: selectedJob.id,
+      ClientId: selectedJob.clientId,
+      WorkerId: user.id || user._id,
+      BidAmount: bidAmount || "Accept Range",
+
+      // 🔥 NEW DATA (IMPORTANT)
+      JobTitle: selectedJob.title,
+      BudgetMin: selectedJob.budgetMin,
+      BudgetMax: selectedJob.budgetMax,
+
+      WorkerName: user.name || user.fullName || "Worker",
+      WorkerLocation: user.location || "Unknown"
     };
+
     console.log("BID PAYLOAD:", payload);
 
     await axios.post(
@@ -87,8 +95,7 @@ function WorkerJobs() {
       error.response?.data?.message ||
       JSON.stringify(error.response?.data) ||
       "Bid failed"
-    
-);
+    );
   }
 };
   return (
