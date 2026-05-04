@@ -11,6 +11,11 @@ function ClientBids() {
   const [bids, setBids] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // 🔥 SAFE VALUE HELPER (IMPORTANT FIX)
+  const getValue = (obj, key1, key2, fallback = "N/A") => {
+    return obj[key1] || obj[key2] || fallback;
+  };
+
   // ================= FETCH BIDS =================
   useEffect(() => {
     const loadBids = async () => {
@@ -49,10 +54,12 @@ function ClientBids() {
         }
       );
 
-      // ✅ keep old logic but FIX field names
+      // ✅ UI update (fixed keys)
       setBids(prev =>
         prev.map(b =>
-          b.Id === bidId ? { ...b, Status: status } : b
+          (b.Id || b._id) === bidId
+            ? { ...b, Status: status }
+            : b
         )
       );
 
@@ -76,62 +83,82 @@ function ClientBids() {
 
       {bids.map(bid => (
         <div
-          key={bid.Id}
+          key={bid.Id || bid._id}
           style={styles.card}
           onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.01)")}
           onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
         >
 
-          {/* 🔥 JOB DETAILS (NEW) */}
-          <h3>💼 {bid.JobTitle}</h3>
+          {/* ✅ JOB TITLE */}
+          <h3>
+            💼 {getValue(bid, "JobTitle", "jobTitle")}
+          </h3>
 
-          <p>👷 {bid.WorkerName}</p>
+          {/* ✅ WORKER NAME */}
+          <p>
+            👷 {getValue(bid, "WorkerName", "workerName")}
+          </p>
 
-            <p>📍 {bid.WorkerLocation}</p>
+          {/* ✅ LOCATION */}
+          <p>
+            📍 {getValue(bid, "WorkerLocation", "workerLocation")}
+          </p>
 
-            <p>
-              💰 Budget: {bid.BudgetMin} - {bid.BudgetMax}
-            </p>
+          {/* ✅ BUDGET */}
+          <p>
+            💰 Budget:{" "}
+            {getValue(bid, "BudgetMin", "budgetMin")} -{" "}
+            {getValue(bid, "BudgetMax", "budgetMax")}
+          </p>
 
-            <p>💸 Bid: {bid.BidAmount}</p>
+          {/* ✅ BID */}
+          <p>
+            💸 Bid: {getValue(bid, "BidAmount", "bidAmount")}
+          </p>
 
-          {/* STATUS */}
+          {/* ✅ STATUS */}
           <p>
             Status:
             <span style={{
               marginLeft: 10,
               fontWeight: "bold",
               color:
-                bid.Status === "Accepted"
+                (bid.Status || bid.status) === "Accepted"
                   ? "#16a34a"
-                  : bid.Status === "Rejected"
+                  : (bid.Status || bid.status) === "Rejected"
                   ? "#dc2626"
                   : "#f59e0b"
             }}>
-              {bid.Status}
+              {bid.Status || bid.status}
             </span>
           </p>
 
-          {/* ACTIONS */}
+          {/* ACTION BUTTONS */}
           <div style={styles.actions}>
 
             <button
-              disabled={bid.Status === "Accepted"}
-              onClick={() => updateStatus(bid.Id, "Accepted")}
+              disabled={(bid.Status || bid.status) === "Accepted"}
+              onClick={() =>
+                updateStatus(bid.Id || bid._id, "Accepted")
+              }
               style={{
                 ...styles.accept,
-                opacity: bid.Status === "Accepted" ? 0.6 : 1
+                opacity:
+                  (bid.Status || bid.status) === "Accepted" ? 0.6 : 1
               }}
             >
               Accept
             </button>
 
             <button
-              disabled={bid.Status === "Rejected"}
-              onClick={() => updateStatus(bid.Id, "Rejected")}
+              disabled={(bid.Status || bid.status) === "Rejected"}
+              onClick={() =>
+                updateStatus(bid.Id || bid._id, "Rejected")
+              }
               style={{
                 ...styles.reject,
-                opacity: bid.Status === "Rejected" ? 0.6 : 1
+                opacity:
+                  (bid.Status || bid.status) === "Rejected" ? 0.6 : 1
               }}
             >
               Reject
@@ -147,7 +174,6 @@ function ClientBids() {
 }
 
 export default ClientBids;
-
 
 
 // ================= STYLES =================
@@ -166,8 +192,7 @@ const styles = {
 
   empty: {
     textAlign: "center",
-    opacity: 0.7,
-    marginTop: "40px"
+    color: "#666"
   },
 
   card: {
