@@ -11,11 +11,6 @@ function ClientBids() {
   const [bids, setBids] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔥 SAFE VALUE HELPER (IMPORTANT FIX)
-  const getValue = (obj, key1, key2, fallback = "N/A") => {
-    return obj[key1] || obj[key2] || fallback;
-  };
-
   // ================= FETCH BIDS =================
   useEffect(() => {
     const loadBids = async () => {
@@ -29,9 +24,26 @@ function ClientBids() {
           `${import.meta.env.VITE_API_URL}/bid/client/${user.id}`
         );
 
-        console.log("CLIENT BIDS:", res.data);
+        console.log("RAW BIDS:", res.data);
 
-        setBids(res.data.data || []);
+        // 🔥 NORMALIZE DATA (MAIN FIX)
+        const normalized = (res.data.data || []).map(b => ({
+          Id: b.Id || b._id,
+
+          JobTitle: b.JobTitle || b.jobTitle,
+          WorkerName: b.WorkerName || b.workerName,
+          WorkerLocation: b.WorkerLocation || b.workerLocation,
+
+          BudgetMin: b.BudgetMin || b.budgetMin,
+          BudgetMax: b.BudgetMax || b.budgetMax,
+
+          BidAmount: b.BidAmount || b.bidAmount,
+          Status: b.Status || b.status
+        }));
+
+        console.log("NORMALIZED BIDS:", normalized);
+
+        setBids(normalized);
 
       } catch (error) {
         console.log("BIDS ERROR:", error);
@@ -54,12 +66,10 @@ function ClientBids() {
         }
       );
 
-      // ✅ UI update (fixed keys)
+      // ✅ UI update
       setBids(prev =>
         prev.map(b =>
-          (b.Id || b._id) === bidId
-            ? { ...b, Status: status }
-            : b
+          b.Id === bidId ? { ...b, Status: status } : b
         )
       );
 
@@ -77,44 +87,34 @@ function ClientBids() {
       <h2 style={styles.title}>📥 Job Applications</h2>
 
       {/* EMPTY STATE */}
-      {bids.length === 0 && !loading && (
+      {bids.length === 0 && (
         <p style={styles.empty}>🚫 No applications received yet</p>
       )}
 
       {bids.map(bid => (
         <div
-          key={bid.Id || bid._id}
+          key={bid.Id}
           style={styles.card}
           onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.01)")}
           onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
         >
 
           {/* ✅ JOB TITLE */}
-          <h3>
-            💼 {getValue(bid, "JobTitle", "jobTitle")}
-          </h3>
+          <h3>💼 {bid.JobTitle || "N/A"}</h3>
 
           {/* ✅ WORKER NAME */}
-          <p>
-            👷 {getValue(bid, "WorkerName", "workerName")}
-          </p>
+          <p>👷 {bid.WorkerName || "N/A"}</p>
 
           {/* ✅ LOCATION */}
-          <p>
-            📍 {getValue(bid, "WorkerLocation", "workerLocation")}
-          </p>
+          <p>📍 {bid.WorkerLocation || "N/A"}</p>
 
           {/* ✅ BUDGET */}
           <p>
-            💰 Budget:{" "}
-            {getValue(bid, "BudgetMin", "budgetMin")} -{" "}
-            {getValue(bid, "BudgetMax", "budgetMax")}
+            💰 Budget: {bid.BudgetMin || "N/A"} - {bid.BudgetMax || "N/A"}
           </p>
 
           {/* ✅ BID */}
-          <p>
-            💸 Bid: {getValue(bid, "BidAmount", "bidAmount")}
-          </p>
+          <p>💸 Bid: {bid.BidAmount || "N/A"}</p>
 
           {/* ✅ STATUS */}
           <p>
@@ -123,13 +123,13 @@ function ClientBids() {
               marginLeft: 10,
               fontWeight: "bold",
               color:
-                (bid.Status || bid.status) === "Accepted"
+                bid.Status === "Accepted"
                   ? "#16a34a"
-                  : (bid.Status || bid.status) === "Rejected"
+                  : bid.Status === "Rejected"
                   ? "#dc2626"
                   : "#f59e0b"
             }}>
-              {bid.Status || bid.status}
+              {bid.Status}
             </span>
           </p>
 
@@ -137,28 +137,22 @@ function ClientBids() {
           <div style={styles.actions}>
 
             <button
-              disabled={(bid.Status || bid.status) === "Accepted"}
-              onClick={() =>
-                updateStatus(bid.Id || bid._id, "Accepted")
-              }
+              disabled={bid.Status === "Accepted"}
+              onClick={() => updateStatus(bid.Id, "Accepted")}
               style={{
                 ...styles.accept,
-                opacity:
-                  (bid.Status || bid.status) === "Accepted" ? 0.6 : 1
+                opacity: bid.Status === "Accepted" ? 0.6 : 1
               }}
             >
               Accept
             </button>
 
             <button
-              disabled={(bid.Status || bid.status) === "Rejected"}
-              onClick={() =>
-                updateStatus(bid.Id || bid._id, "Rejected")
-              }
+              disabled={bid.Status === "Rejected"}
+              onClick={() => updateStatus(bid.Id, "Rejected")}
               style={{
                 ...styles.reject,
-                opacity:
-                  (bid.Status || bid.status) === "Rejected" ? 0.6 : 1
+                opacity: bid.Status === "Rejected" ? 0.6 : 1
               }}
             >
               Reject
