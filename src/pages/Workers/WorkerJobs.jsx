@@ -10,6 +10,25 @@ function WorkerJobs() {
   const [selectedJob, setSelectedJob] = useState(null);
   const [bidAmount, setBidAmount] = useState("");
 
+  // 🟡 FILTER STATES (NEW ADDED)
+  const [category, setCategory] = useState("All");
+  const [distance, setDistance] = useState(10);
+  const [jobType, setJobType] = useState("All");
+  const [distances, setDistances] = useState({});
+
+  const [isListening, setIsListening] = useState(false);
+
+  useEffect(() => {
+  const generated = {};
+
+  jobs.forEach(job => {
+    generated[job._id] = Math.floor(Math.random() * 10) + 1;
+  });
+
+  setDistances(generated);
+
+}, [jobs]); // NEW ADDED
+
    // ================= FETCH ALL JOBS FROM BACKEND =================
   useEffect(() => {
     const loadJobs = async () => {
@@ -34,12 +53,56 @@ function WorkerJobs() {
     setMyJobs(JSON.parse(localStorage.getItem("myJobs")) || []);
   }, []);
 
+  const startVoiceSearch = () => {
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    alert("Your browser does not support voice search");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = "en-US"; // you can change to "ur-PK"
+  recognition.interimResults = false;
+
+  setIsListening(true);
+
+  recognition.start();
+
+  recognition.onresult = (event) => {
+    const text = event.results[0][0].transcript;
+
+    console.log("VOICE INPUT:", text);
+
+    setSearch(text); // 🔥 auto fill search input
+    setIsListening(false);
+  };
+
+  recognition.onerror = () => {
+    setIsListening(false);
+    alert("Voice recognition failed");
+  };
+
+  recognition.onend = () => {
+    setIsListening(false);
+  };
+};
    // ================= FILTER =================
-  const filteredJobs = jobs.filter(job =>
-    (job.title || job.Title || "")
-      .toLowerCase()
-      .includes(search.toLowerCase())
-  );
+  const filteredJobs = jobs.filter(job => {
+    const matchSearch =
+      (job.title || job.Title || "")
+        .toLowerCase()
+        .includes(search.toLowerCase());
+
+    const matchCategory =
+      category === "All" || job.category === category;
+
+    const matchType =
+      jobType === "All" || job.jobType === jobType;
+
+    return matchSearch && matchCategory && matchType;
+  });
 
   // 🚀 OPEN MODAL
   const openBidModal = (job) => {
@@ -145,43 +208,113 @@ const submitBid = async () => {
     <div style={styles.container}>
 
       {/* HEADER */}
-      <h2 style={styles.title}>📦 Available Jobs</h2>
+      <h2 style={styles.title}>📦 FIND JOBS</h2>
 
       {/* SEARCH */}
-      <input
-        placeholder="🔍 Search jobs..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        style={styles.search}
-      />
+      {/* ================= SEARCH BAR ================= */}
+      <div style={styles.searchBox}>
+        <input
+          placeholder="🔍 Search jobs..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={styles.search}
+        />
 
-      {/* JOB LIST */}
-      {/* JOB LIST */}
+        {/* 🎤 Voice Search (NEW ADDED UI ONLY) */}
+        <button
+  onClick={startVoiceSearch}
+  style={{
+    ...styles.voiceBtn,
+    background: isListening ? "#ff6a00" : "#eee",
+    color: isListening ? "#fff" : "#000",
+    transform: isListening ? "scale(1.1)" : "scale(1)"
+  }}
+>
+  {isListening ? "🎙️ Listening..." : "🎤"}
+</button>
+      </div>
+
+      {/* ================= FILTERS ================= */}
+      <div style={styles.filterBox}>
+
+        {/* Category Filter */}
+        <select 
+        style={styles.filterBtn}
+        onChange={(e) => setCategory(e.target.value)}>
+          <option>All</option>
+          <option>Cleaning</option>
+          <option>Plumbing</option>
+          <option>Delivery</option>
+        </select>
+
+        {/* Job Type Filter */}
+        <select 
+        style={styles.filterBtn}
+        onChange={(e) => setJobType(e.target.value)}>
+          <option>All</option>
+          <option>Full Time</option>
+          <option>Part Time</option>
+        </select>
+
+        {/* Distance Filter */}
+        <div style={styles.range}>
+        <input
+          
+          type="range"
+          min="1"
+          max="50"
+          value={distance}
+          onChange={(e) => setDistance(e.target.value)}
+        />
+        <span>{distance} KM</span>
+
+        </div>
+
+      </div>
+
+      {/* ================= JOB CARDS ================= */}
       <div style={styles.grid}>
 
         {filteredJobs.map(job => (
           <div key={job._id} style={styles.card}>
 
-            <h3 style={styles.jobTitle}>
-              {job.title || job.Title}
-            </h3>
+            {/* JOB TITLE */}
+            <h3>💼 {job.title || job.Title}</h3>
 
-            <p style={styles.desc}>
-              {job.description || job.Description}
-            </p>
+            {/* DESCRIPTION */}
+            <p>{job.description}</p>
 
+            {/* INFO */}
             <div style={styles.infoBox}>
-              👤 Client <br />
-              📍 {job.location || job.Location} <br />
-              💰 {job.budgetMin || job.BudgetMin} - {job.budgetMax || job.BudgetMax}
+              💰 {job.budgetMin} - {job.budgetMax} <br />
+
+              {/* ⭐ Employer Rating (NEW UI PLACEHOLDER) */}
+              ⭐ Rating: 4.5 <br />
+
+              {/* 📍 Distance (NEW UI PLACEHOLDER) */}
+              📍 {distances[job._id]} km <br />
+
+              {/* ⏰ Time Posted */}
+              ⏰ Just now
             </div>
 
-            <button
-              onClick={() => openBidModal(job)}
-              style={styles.applyBtn}
-            >
-              Apply / Bid
-            </button>
+            {/* BUTTONS */}
+            <div style={styles.btnRow}>
+
+              {/* ⭐ SAVE JOB (NEW ADDED) */}
+              <button style={styles.saveBtn}>
+                ⭐ Save
+              </button>
+
+              {/* APPLY */}
+              <button
+                onClick={() => openBidModal(job)}
+                style={styles.applyBtn}
+              >
+                Apply
+              </button>
+
+            </div>
 
           </div>
         ))}
@@ -240,49 +373,127 @@ const submitBid = async () => {
   );
 }
 
-/* 🎨 ORANGE + WHITE THEME */
+/* 🎨 MODERN ORANGE + CLEAN WHITE UI */
 const styles = {
+
   container: {
-    padding: "20px",
-    fontFamily: "Arial",
-    background: "#fff",
+    padding: "24px",
+    fontFamily: "Inter, Arial, sans-serif",
+    background: "#f8f9fb",
     minHeight: "100vh"
   },
 
   title: {
     color: "#ff6a00",
-    marginBottom: "10px"
+    marginBottom: "16px",
+    fontSize: "22px",
+    fontWeight: "700"
   },
 
-  search: {
-    width: "100%",
-    padding: "12px",
+  /* ================= SEARCH SECTION ================= */
+  searchBox: {
+    display: "flex",
+    gap: "10px",
+    marginBottom: "15px",
+    alignItems: "center",
+    flexWrap: "wrap",
+  },
+
+  search:{
+    flex: 1,
+    minWidth: "200px",
+    padding: "12px 14px",
     borderRadius: "10px",
-    border: "1px solid #eee",
-    marginBottom: "15px"
+    border: "1px solid #ff6a00",
+    outline: "none",
+    background: "#fff",
+    fontSize: "14px"
   },
 
+
+  voiceBtn: {
+    padding: "12px 14px",
+    borderRadius: "10px",
+    border: "1px solid #ff6a00",
+    background: "#fff",
+    cursor: "pointer"
+  },
+
+  /* ================= FILTER ================= */
+  filterBox: {
+    display: "flex",
+    gap: "8px",
+    marginBottom: "18px",
+    flexWrap: "wrap",
+    // border: "1px solid #e01c1c",
+  },
+
+  filterBtn: {
+    padding: "7px 12px",
+    borderRadius: "20px",
+    border: "1px solid #ff6a00",
+    background: "#fff",
+    cursor: "pointer",
+    fontSize: "12px",
+    transition: "0.2s"
+  },
+
+  actionRow: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center"
+  },
+
+  saveBtn: {
+    padding: "12px",
+    borderRadius: "12px",
+    // border: "none",
+    background: "#fff",
+    color: "#000000",
+    fontWeight: "600",
+    cursor: "pointer",
+    border: "1px solid #ff6a00",
+  },
+
+  btnRow :{
+    display: "flex",
+    gap: "10px",
+    marginBottom: "15px",
+    alignItems: "center",
+    flexWrap: "wrap",
+  },
+
+
+  /* ================= GRID ================= */
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-    gap: "12px"
+    gridTemplateColumns: "repeat(auto-fit, minmax(270px, 1fr))",
+    gap: "16px"
   },
 
+  /* ================= CARD ================= */
   card: {
-    border: "1px solid #ffe0cc",
-    padding: "15px",
-    borderRadius: "12px",
-    boxShadow: "0 6px 20px rgba(255,106,0,0.08)"
+    border: "1px solid #eee",
+    background: "#fff",
+    padding: "16px",
+    borderRadius: "14px",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px"
   },
 
   jobTitle: {
     margin: 0,
-    color: "#ff6a00"
+    color: "#ff6a00",
+    fontSize: "16px",
+    fontWeight: "700"
   },
 
   desc: {
     fontSize: "13px",
-    color: "#555"
+    color: "#666",
+    lineHeight: "1.4"
   },
 
   infoBox: {
@@ -290,57 +501,69 @@ const styles = {
     padding: "10px",
     borderRadius: "10px",
     fontSize: "12px",
-    marginTop: "10px"
+    lineHeight: "1.5",
+    color: "#444"
   },
 
+  /* ================= BUTTON ================= */
   applyBtn: {
-    marginTop: "10px",
-    width: "100%",
-    padding: "10px",
-    background: "linear-gradient(90deg, #ff6a00, #ff9f1c)",
-    color: "white",
+    padding: "12px",
+    borderRadius: "12px",
     border: "none",
-    borderRadius: "8px",
+    background: "linear-gradient(90deg, #ff6a00, #ff9f1c)",
+    color: "#fff",
+    fontWeight: "600",
     cursor: "pointer"
   },
 
-  /* 🟠 MODAL */
+  /* ================= MODAL ================= */
   modalOverlay: {
     position: "fixed",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    background: "rgba(0,0,0,0.5)",
+    background: "rgba(0,0,0,0.55)",
     display: "flex",
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
+    padding: "20px"
   },
 
   modal: {
     background: "#fff",
-    padding: "20px",
-    borderRadius: "12px",
-    width: "300px",
-    textAlign: "center"
+    padding: "22px",
+    borderRadius: "14px",
+    width: "100%",
+    maxWidth: "380px",
+    textAlign: "center",
+    boxShadow: "0 10px 25px rgba(0,0,0,0.15)"
   },
 
   rangeBox: {
     background: "#fff7f0",
-    padding: "10px",
+    padding: "12px",
     borderRadius: "10px",
-    margin: "10px 0",
-    fontSize: "13px"
+    margin: "12px 0",
+    fontSize: "13px",
+    color: "#444"
   },
 
   input: {
     width: "100%",
-    padding: "10px",
-    borderRadius: "8px",
-    border: "1px solid #eee",
-    marginBottom: "10px"
+    padding: "12px",
+    borderRadius: "10px",
+    border: "1px solid #ddd",
+    marginBottom: "12px",
+    outline: "none",
+    boxSizing: "border-box"
   },
-
+  range:{
+    // border :"1px solid red",
+    flex: 1,
+    justifyContent:'center',
+    alignItems:'center'
+  },
   modalActions: {
     display: "flex",
     gap: "10px"
@@ -351,18 +574,20 @@ const styles = {
     background: "#ff6a00",
     color: "white",
     border: "none",
-    padding: "10px",
-    borderRadius: "8px",
-    cursor: "pointer"
+    padding: "11px",
+    borderRadius: "10px",
+    cursor: "pointer",
+    fontWeight: "600"
   },
 
   cancelBtn: {
     flex: 1,
-    background: "#ddd",
+    background: "#e5e5e5",
     border: "none",
-    padding: "10px",
-    borderRadius: "8px",
-    cursor: "pointer"
+    padding: "11px",
+    borderRadius: "10px",
+    cursor: "pointer",
+    fontWeight: "500"
   }
 };
 
