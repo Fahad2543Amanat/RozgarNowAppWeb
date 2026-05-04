@@ -3,7 +3,6 @@ import axios from "axios";
 
 function ClientBids() {
 
-  // ✅ user state (same logic)
   const [user] = useState(() =>
     JSON.parse(localStorage.getItem("user"))
   );
@@ -11,7 +10,7 @@ function ClientBids() {
   const [bids, setBids] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ================= FETCH BIDS =================
+  // ================= FETCH =================
   useEffect(() => {
     const loadBids = async () => {
       try {
@@ -24,30 +23,13 @@ function ClientBids() {
           `${import.meta.env.VITE_API_URL}/bid/client/${user.id}`
         );
 
-        console.log("RAW BIDS:", res.data);
-        console.log("API FULL RESPONSE:", res.data.data);
+        console.log("API RESPONSE:", res.data);
 
-        // 🔥 NORMALIZE DATA (MAIN FIX)
-        const normalized = (res.data.data || []).map(b => ({
-          Id: b.Id || b._id,
-
-          JobTitle: b.JobTitle || b.jobTitle,
-          WorkerName: b.WorkerName || b.workerName,
-          WorkerLocation: b.WorkerLocation || b.workerLocation,
-
-          BudgetMin: b.BudgetMin || b.budgetMin,
-          BudgetMax: b.BudgetMax || b.budgetMax,
-
-          BidAmount: b.BidAmount || b.bidAmount,
-          Status: b.Status || b.status
-        }));
-
-        console.log("NORMALIZED BIDS:", normalized);
-
-        setBids(normalized);
+        // ✅ DIRECT USE (NO NORMALIZATION)
+        setBids(res.data.data || []);
 
       } catch (error) {
-        console.log("BIDS ERROR:", error);
+        console.log("ERROR:", error);
       } finally {
         setLoading(false);
       }
@@ -67,102 +49,86 @@ function ClientBids() {
         }
       );
 
-      // ✅ UI update
       setBids(prev =>
         prev.map(b =>
-          b.Id === bidId ? { ...b, Status: status } : b
+          b.id === bidId ? { ...b, status } : b
         )
       );
 
     } catch (error) {
-      console.log("STATUS UPDATE ERROR:", error);
+      console.log(error);
     }
   };
 
-  // ================= LOADING =================
-  if (loading) return <p>Loading bids...</p>;
+  if (loading) return <p>Loading...</p>;
 
   return (
     <div style={styles.container}>
 
       <h2 style={styles.title}>📥 Job Applications</h2>
 
-      {/* EMPTY STATE */}
       {bids.length === 0 && (
-        <p style={styles.empty}>🚫 No applications received yet</p>
+        <p style={styles.empty}>No applications yet</p>
       )}
 
-      {bids.map(bid => {
-  console.log("BID ITEM:", bid); // 🔥 DEBUG
+      {bids.map(bid => (
+        <div key={bid.id} style={styles.card}>
 
-  return (
-    <div key={bid.Id || bid._id} style={styles.card}>
+          {/* ✅ JOB DATA (from nested job object) */}
+          <h3>💼 {bid.job?.title}</h3>
 
-      {/* ✅ SAFE DATA ACCESS */}
-      <h3>
-        💼 {bid.JobTitle || bid.jobTitle || "N/A"}
-      </h3>
+          {/* ❗ worker name backend se nahi aa raha */}
+          <p>👷 Worker ID: {bid.workerId}</p>
 
-      <p>
-        👷 {bid.WorkerName || bid.workerName || "N/A"}
-      </p>
+          <p>📍 {bid.job?.location}</p>
 
-      <p>
-        📍 {bid.WorkerLocation || bid.workerLocation || "N/A"}
-      </p>
+          <p>
+            💰 Budget: {bid.job?.budgetMin} - {bid.job?.budgetMax}
+          </p>
 
-      <p>
-        💰 Budget: 
-        {bid.BudgetMin || bid.budgetMin || "N/A"} - 
-        {bid.BudgetMax || bid.budgetMax || "N/A"}
-      </p>
+          <p>💸 Bid: {bid.bidAmount}</p>
 
-      <p>
-        💸 Bid: {bid.BidAmount || bid.bidAmount || "N/A"}
-      </p>
+          {/* STATUS */}
+          <p>
+            Status:
+            <span style={{
+              marginLeft: 10,
+              fontWeight: "bold",
+              color:
+                bid.status === "Accepted"
+                  ? "green"
+                  : bid.status === "Rejected"
+                  ? "red"
+                  : "orange"
+            }}>
+              {bid.status}
+            </span>
+          </p>
 
-      <p>
-        Status:
-        <span style={{
-          marginLeft: 10,
-          fontWeight: "bold",
-          color:
-            (bid.Status || bid.status) === "Accepted"
-              ? "#16a34a"
-              : (bid.Status || bid.status) === "Rejected"
-              ? "#dc2626"
-              : "#f59e0b"
-        }}>
-          {bid.Status || bid.status}
-        </span>
-      </p>
+          <div style={styles.actions}>
+            <button
+              onClick={() => updateStatus(bid.id, "Accepted")}
+              style={styles.accept}
+            >
+              Accept
+            </button>
 
-      <div style={styles.actions}>
-        <button
-          onClick={() => updateStatus(bid.Id || bid._id, "Accepted")}
-          style={styles.accept}
-        >
-          Accept
-        </button>
+            <button
+              onClick={() => updateStatus(bid.id, "Rejected")}
+              style={styles.reject}
+            >
+              Reject
+            </button>
+          </div>
 
-        <button
-          onClick={() => updateStatus(bid.Id || bid._id, "Rejected")}
-          style={styles.reject}
-        >
-          Reject
-        </button>
-      </div>
-
-    </div>
-  );
-})}
+        </div>
+      ))}
 
     </div>
   );
 }
 
 export default ClientBids;
-
 
 // ================= STYLES =================
 const styles = {
