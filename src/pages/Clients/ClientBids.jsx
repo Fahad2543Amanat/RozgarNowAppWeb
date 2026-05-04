@@ -79,8 +79,7 @@ function ClientBids() {
 
           {/* ❗ worker name backend se nahi aa raha */}
           <p>👷 {bid.workerName || "Unknown"}</p>
-          <p>📍 {bid.workerLocation || "N/A"}</p>
-          <p>📍 {bid.city || "City"}</p>
+          <p>📍 {bid.workerCity || "Loading..."}</p>
 
           {/* <p>📍 {bid.job?.location}</p> */}
 
