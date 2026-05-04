@@ -78,9 +78,10 @@ function ClientBids() {
           <h3>💼 {bid.job?.title}</h3>
 
           {/* ❗ worker name backend se nahi aa raha */}
-          <p>👷 Worker Name: {bid.WorkerName}</p>
+          <p>👷 {bid.workerName || "Unknown"}</p>
+          <p>📍 {bid.workerLocation || "N/A"}</p>
 
-          <p>📍 {bid.job?.location}</p>
+          {/* <p>📍 {bid.job?.location}</p> */}
 
           <p>
             💰 Budget: {bid.job?.budgetMin} - {bid.job?.budgetMax}
