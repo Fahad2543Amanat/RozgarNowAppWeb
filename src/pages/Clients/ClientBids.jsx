@@ -25,6 +25,7 @@ function ClientBids() {
         );
 
         console.log("RAW BIDS:", res.data);
+        console.log("API FULL RESPONSE:", res.data.data);
 
         // 🔥 NORMALIZE DATA (MAIN FIX)
         const normalized = (res.data.data || []).map(b => ({
@@ -91,77 +92,70 @@ function ClientBids() {
         <p style={styles.empty}>🚫 No applications received yet</p>
       )}
 
-      {bids.map(bid => (
-        <div
-          key={bid.Id}
-          style={styles.card}
-          onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.01)")}
-          onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+      {bids.map(bid => {
+  console.log("BID ITEM:", bid); // 🔥 DEBUG
+
+  return (
+    <div key={bid.Id || bid._id} style={styles.card}>
+
+      {/* ✅ SAFE DATA ACCESS */}
+      <h3>
+        💼 {bid.JobTitle || bid.jobTitle || "N/A"}
+      </h3>
+
+      <p>
+        👷 {bid.WorkerName || bid.workerName || "N/A"}
+      </p>
+
+      <p>
+        📍 {bid.WorkerLocation || bid.workerLocation || "N/A"}
+      </p>
+
+      <p>
+        💰 Budget: 
+        {bid.BudgetMin || bid.budgetMin || "N/A"} - 
+        {bid.BudgetMax || bid.budgetMax || "N/A"}
+      </p>
+
+      <p>
+        💸 Bid: {bid.BidAmount || bid.bidAmount || "N/A"}
+      </p>
+
+      <p>
+        Status:
+        <span style={{
+          marginLeft: 10,
+          fontWeight: "bold",
+          color:
+            (bid.Status || bid.status) === "Accepted"
+              ? "#16a34a"
+              : (bid.Status || bid.status) === "Rejected"
+              ? "#dc2626"
+              : "#f59e0b"
+        }}>
+          {bid.Status || bid.status}
+        </span>
+      </p>
+
+      <div style={styles.actions}>
+        <button
+          onClick={() => updateStatus(bid.Id || bid._id, "Accepted")}
+          style={styles.accept}
         >
+          Accept
+        </button>
 
-          {/* ✅ JOB TITLE */}
-          <h3>💼 {bid.JobTitle || "N/A"}</h3>
+        <button
+          onClick={() => updateStatus(bid.Id || bid._id, "Rejected")}
+          style={styles.reject}
+        >
+          Reject
+        </button>
+      </div>
 
-          {/* ✅ WORKER NAME */}
-          <p>👷 {bid.WorkerName || "N/A"}</p>
-
-          {/* ✅ LOCATION */}
-          <p>📍 {bid.WorkerLocation || "N/A"}</p>
-
-          {/* ✅ BUDGET */}
-          <p>
-            💰 Budget: {bid.BudgetMin || "N/A"} - {bid.BudgetMax || "N/A"}
-          </p>
-
-          {/* ✅ BID */}
-          <p>💸 Bid: {bid.BidAmount || "N/A"}</p>
-
-          {/* ✅ STATUS */}
-          <p>
-            Status:
-            <span style={{
-              marginLeft: 10,
-              fontWeight: "bold",
-              color:
-                bid.Status === "Accepted"
-                  ? "#16a34a"
-                  : bid.Status === "Rejected"
-                  ? "#dc2626"
-                  : "#f59e0b"
-            }}>
-              {bid.Status}
-            </span>
-          </p>
-
-          {/* ACTION BUTTONS */}
-          <div style={styles.actions}>
-
-            <button
-              disabled={bid.Status === "Accepted"}
-              onClick={() => updateStatus(bid.Id, "Accepted")}
-              style={{
-                ...styles.accept,
-                opacity: bid.Status === "Accepted" ? 0.6 : 1
-              }}
-            >
-              Accept
-            </button>
-
-            <button
-              disabled={bid.Status === "Rejected"}
-              onClick={() => updateStatus(bid.Id, "Rejected")}
-              style={{
-                ...styles.reject,
-                opacity: bid.Status === "Rejected" ? 0.6 : 1
-              }}
-            >
-              Reject
-            </button>
-
-          </div>
-
-        </div>
-      ))}
+    </div>
+  );
+})}
 
     </div>
   );
