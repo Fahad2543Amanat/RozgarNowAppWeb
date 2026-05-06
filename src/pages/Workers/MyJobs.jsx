@@ -23,11 +23,12 @@ function MyJobs() {
 
         console.log("MY JOBS:", res.data);
 
-        // 🔥 NORMALIZE
+        // 🔥 NORMALIZE DATA
         const formatted = (res.data.data || []).map(item => ({
           id: item.id,
           status: item.status,
           bid: item.bidAmount,
+
           progress:
             item.status === "Completed"
               ? 100
@@ -41,7 +42,9 @@ function MyJobs() {
           title: item.job?.title || "Untitled Job",
           description: item.job?.description || "No description",
           location: item.job?.location || "Remote",
-          clientName: item.job?.clientName || "Client",
+
+          // ✅ CLIENT NAME FIX
+          clientName: item.clientName || "Unknown Client",
         }));
 
         setJobs(formatted);
@@ -141,7 +144,7 @@ function MyJobs() {
 
             <div key={job.id} style={styles.card}>
 
-              {/* TITLE */}
+              {/* TOP */}
               <div style={styles.cardTop}>
 
                 <h3 style={styles.jobTitle}>
@@ -180,7 +183,7 @@ function MyJobs() {
                 📍 Location: {job.location}
                 <br />
 
-                💰 Bid: {job.bid}
+                💰 Your Bid: {job.bid}
 
               </div>
 
@@ -227,6 +230,7 @@ function MyJobs() {
     </div>
   );
 }
+
 
 /* 🎨 ORANGE + WHITE THEME */
 const styles = {
