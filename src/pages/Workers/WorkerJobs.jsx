@@ -279,10 +279,10 @@ const submitBid = async () => {
           <div key={job._id} style={styles.card}>
 
             {/* JOB TITLE */}
-            <h3>💼 {job.title || job.Title}</h3>
+            <h3 style={{color: "#ff6a00", padding:'2px'}}>💼 {job.title || job.Title}</h3>
 
             {/* DESCRIPTION */}
-            <p>{job.description}</p>
+            <p style={{ padding:'3px'}}>{job.description}</p>
 
             {/* INFO */}
             <div style={styles.infoBox}>
@@ -473,14 +473,14 @@ const styles = {
 
   /* ================= CARD ================= */
   card: {
-    border: "1px solid #eee",
+    border: "1px solid #ff6a00",
     background: "#fff",
-    padding: "16px",
+    padding: "10px",
     borderRadius: "14px",
     boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-    display: "flex",
+    // display: "flex",
     flexDirection: "column",
-    gap: "8px"
+    // gap: "8px"
   },
 
   jobTitle: {
@@ -502,7 +502,11 @@ const styles = {
     borderRadius: "10px",
     fontSize: "12px",
     lineHeight: "1.5",
-    color: "#444"
+    color: "#0e0e0e",
+    // border: "1px solid green",
+    marginBottom: "12px",
+    fontWeight:'bold'
+    
   },
 
   /* ================= BUTTON ================= */

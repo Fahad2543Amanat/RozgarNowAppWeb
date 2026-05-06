@@ -65,65 +65,134 @@ function ClientBids() {
   return (
     <div style={styles.container}>
 
-      <h2 style={styles.title}>📥 Job Applications</h2>
+      <div
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: "14px",
+    marginBottom: "28px",
+  }}
+>
+  <div style={styles.titleIcon}>📥</div>
+
+  <h2 style={styles.title}>
+    Job Applications
+  </h2>
+</div>
 
       {bids.length === 0 && (
-        <p style={styles.empty}>No applications yet</p>
-      )}
+  <div style={styles.emptyWrapper}>
+    <div style={styles.empty}>
+      <div style={{ fontSize: "48px", marginBottom: "10px" }}>
+        📭
+      </div>
+
+      <p style={{ margin: 0 }}>
+        No applications yet
+      </p>
+
+      <span
+        style={{
+          display: "block",
+          marginTop: "8px",
+          fontSize: "14px",
+          color: "#9ca3af",
+          fontWeight: "400",
+        }}
+      >
+        Applications will appear here once workers apply.
+      </span>
+    </div>
+  </div>
+)}
+    <div style={styles.grid}>
 
       {bids.map(bid => (
         <div key={bid.id} style={styles.card}>
 
-          {/* ✅ JOB DATA (from nested job object) */}
-          <h3>💼 {bid.job?.title}</h3>
+  <div style={styles.cardTopGlow}></div>
 
-          {/* ❗ worker name backend se nahi aa raha */}
-          <p>👷 {bid.workerName || "Unknown"}</p>
-          <p>📍 {bid.workerCity || "Loading..."}</p>
+  {/* TITLE */}
+  <h3 style={styles.titlebid}>
+    💼 {bid.job?.title}
+  </h3>
 
-          {/* <p>📍 {bid.job?.location}</p> */}
+  {/* WORKER */}
+  <div style={styles.infoRow}>
+    <span>👷</span>
+    <span>{bid.workerName || "Unknown Worker"}</span>
+  </div>
 
-          <p>
-            💰 Budget: {bid.job?.budgetMin} - {bid.job?.budgetMax}
-          </p>
+  {/* CITY */}
+  <div style={styles.infoRow}>
+    <span>📍</span>
+    <span>{bid.workerCity || "Location not available"}</span>
+  </div>
 
-          <p>💸 Bid: {bid.bidAmount}</p>
+  {/* BUDGET */}
+  <div style={styles.budgetBox}>
+    <div style={styles.infoRow}>
+      <span>💰</span>
+      <span>
+        Budget: {bid.job?.budgetMin} - {bid.job?.budgetMax}
+      </span>
+    </div>
 
-          {/* STATUS */}
-          <p>
-            Status:
-            <span style={{
-              marginLeft: 10,
-              fontWeight: "bold",
-              color:
-                bid.status === "Accepted"
-                  ? "green"
-                  : bid.status === "Rejected"
-                  ? "red"
-                  : "orange"
-            }}>
-              {bid.status}
-            </span>
-          </p>
+    <div style={styles.infoRow}>
+      <span>💸</span>
+      <span>Bid Amount: {bid.bidAmount}</span>
+    </div>
+  </div>
 
-          <div style={styles.actions}>
-            <button
-              onClick={() => updateStatus(bid.id, "Accepted")}
-              style={styles.accept}
-            >
-              Accept
-            </button>
+  {/* STATUS */}
+  <div style={{ marginTop: 10 }}>
+    <span style={{ fontWeight: "600", color: "#374151" }}>
+      Status:
+    </span>
 
-            <button
-              onClick={() => updateStatus(bid.id, "Rejected")}
-              style={styles.reject}
-            >
-              Reject
-            </button>
-          </div>
+    <span
+      style={{
+        ...styles.statusBadge,
+        marginLeft: 10,
+        background:
+          bid.status === "Accepted"
+            ? "#dcfce7"
+            : bid.status === "Rejected"
+            ? "#fee2e2"
+            : "#fef3c7",
 
-        </div>
+        color:
+          bid.status === "Accepted"
+            ? "#15803d"
+            : bid.status === "Rejected"
+            ? "#dc2626"
+            : "#d97706",
+      }}
+    >
+      {bid.status}
+    </span>
+  </div>
+
+  {/* ACTIONS */}
+  <div style={styles.actions}>
+    <button
+      onClick={() => updateStatus(bid.id, "Accepted")}
+      style={styles.accept}
+    >
+      ✔ Accept
+    </button>
+
+    <button
+      onClick={() => updateStatus(bid.id, "Rejected")}
+      style={styles.reject}
+    >
+      ✖ Reject
+    </button>
+  </div>
+
+</div>
       ))}
+    </div>
 
     </div>
   );
@@ -135,54 +204,147 @@ export default ClientBids;
 const styles = {
   container: {
     padding: "20px",
-    background: "#f6f7fb",
+    background: "#ffffff",
     minHeight: "100vh"
   },
 
-  title: {
-    marginBottom: "20px",
-    fontSize: "22px",
-    fontWeight: "600"
-  },
+title: {
+  fontSize: "32px",
+  fontWeight: "800",
+  background: "linear-gradient(135deg, #ff7a00, #ffb347)",
+  WebkitBackgroundClip: "text",
+  WebkitTextFillColor: "transparent",
+  marginBottom: "28px",
+  display: "flex",
+  alignItems: "center",
+  gap: "12px",
+  letterSpacing: "-0.5px",
+},
 
-  empty: {
-    textAlign: "center",
-    color: "#666"
+titleIcon: {
+  background: "linear-gradient(135deg, #ff7a00, #ff9f43)",
+  width: "52px",
+  height: "52px",
+  borderRadius: "16px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: "24px",
+  boxShadow: "0 8px 20px rgba(255,122,0,0.25)",
+},
+
+emptyWrapper: {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  padding: "40px 20px",
+},
+
+empty: {
+  background: "linear-gradient(145deg, #ffffff, #f8fafc)",
+  padding: "24px 30px",
+  borderRadius: "20px",
+  textAlign: "center",
+  color: "#6b7280",
+  fontSize: "18px",
+  fontWeight: "600",
+  boxShadow: "0 8px 24px rgba(0,0,0,0.06)",
+  border: "1px solid rgba(0,0,0,0.05)",
+  maxWidth: "320px",
+  width: "100%",
+},
+
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(270px, 1fr))",
+    gap: "16px"
   },
 
   card: {
-    background: "#fff",
-    padding: "16px",
-    borderRadius: "12px",
-    marginBottom: "15px",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
-    borderLeft: "4px solid #ff7a00",
-    transition: "0.2s"
-  },
+  background: "linear-gradient(145deg, #ffffff, #f8fafc)",
+  padding: "20px",
+  borderRadius: "20px",
+  marginBottom: "20px",
+  border: "1px solid rgba(255,255,255,0.2)",
+  boxShadow: "0 10px 30px rgba(255, 203, 125, 0.616)",
+  backdropFilter: "blur(10px)",
+  position: "relative",
+  overflow: "hidden",
+  transition: "all 0.3s ease",
+},
 
-  actions: {
-    marginTop: "12px",
-    display: "flex",
-    gap: "10px"
-  },
+cardTopGlow: {
+  position: "absolute",
+  top: "-40px",
+  right: "-40px",
+  width: "120px",
+  height: "120px",
+  background: "rgba(255,122,0,0.08)",
+  borderRadius: "50%",
+},
 
-  accept: {
-    background: "#16a34a",
-    color: "#fff",
-    border: "none",
-    padding: "8px 14px",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontWeight: "500"
-  },
+titlebid: {
+  fontSize: "22px",
+  fontWeight: "700",
+  color: "#111827",
+  marginBottom: "12px",
+},
 
-  reject: {
-    background: "#dc2626",
-    color: "#fff",
-    border: "none",
-    padding: "8px 14px",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontWeight: "500"
-  }
+infoRow: {
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
+  marginBottom: "10px",
+  color: "#4b5563",
+  fontSize: "15px",
+},
+
+budgetBox: {
+  background: "linear-gradient(135deg, #fff7ed, #ffedd5)",
+  padding: "12px",
+  borderRadius: "14px",
+  marginTop: "14px",
+  marginBottom: "14px",
+  border: "1px solid #fed7aa",
+},
+
+statusBadge: {
+  padding: "6px 14px",
+  borderRadius: "30px",
+  fontSize: "13px",
+  fontWeight: "600",
+  display: "inline-block",
+},
+
+actions: {
+  display: "flex",
+  gap: "12px",
+  marginTop: "18px",
+},
+
+accept: {
+  flex: 1,
+  background: "linear-gradient(135deg, #ff7a00, #ffb347)",
+  color: "#fff",
+  border: "none",
+  padding: "12px",
+  borderRadius: "12px",
+  fontWeight: "600",
+  cursor: "pointer",
+  boxShadow: "0 4px 12px rgba(34,197,94,0.3)",
+  transition: "0.3s",
+},
+
+reject: {
+  flex: 1,
+  background: "#fff",
+  color: "#ff7a00",
+  border: "1px solid red",
+  padding: "12px",
+  borderRadius: "12px",
+  fontWeight: "600",
+  cursor: "pointer",
+  boxShadow: "0 4px 12px rgba(239,68,68,0.3)",
+  transition: "0.3s",
+}
 };
