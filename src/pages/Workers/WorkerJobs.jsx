@@ -14,20 +14,27 @@ function WorkerJobs() {
   const [category, setCategory] = useState("All");
   const [distance, setDistance] = useState(10);
   const [jobType, setJobType] = useState("All");
-  const [distances, setDistances] = useState({});
+  // const [distances, setDistances] = useState({});
 
   const [isListening, setIsListening] = useState(false);
 
-  useEffect(() => {
-  const generated = {};
+  const [flippedCard, setFlippedCard] = useState(null);
 
-  jobs.forEach(job => {
-    generated[job._id] = Math.floor(Math.random() * 10) + 1;
-  });
+  const [detailJob, setDetailJob] = useState(null);
 
-  setDistances(generated);
+  const handleFlip = (id) => {
+    setFlippedCard(flippedCard === id ? null : id);
+  };
+  // useEffect(() => {
+  // const generated = {};
 
-}, [jobs]); // NEW ADDED
+//   jobs.forEach(job => {
+//     generated[job._id] = Math.floor(Math.random() * 10) + 1;
+//   });
+
+//   setDistances(generated);
+
+// }, [jobs]); // NEW ADDED
 
    // ================= FETCH ALL JOBS FROM BACKEND =================
   useEffect(() => {
@@ -115,6 +122,10 @@ function WorkerJobs() {
 
     setSelectedJob(job);
   };
+
+  const openDetailModal = (job) => {
+  setDetailJob(job);
+};
 
 //   const submitBid = async () => {
 //   try {
@@ -275,51 +286,145 @@ const submitBid = async () => {
       {/* ================= JOB CARDS ================= */}
       <div style={styles.grid}>
 
-        {filteredJobs.map(job => (
-          <div key={job._id} style={styles.card}>
+      {filteredJobs.map(job => (
+        <div
+          key={job._id}
+          style={{
+            ...styles.cardContainer
+          }}
+          // onClick={() => handleFlip(job._id)}
+        >
 
-            {/* JOB TITLE */}
-            <h3 style={{color: "#ff6a00", padding:'2px'}}>💼 {job.title || job.Title}</h3>
+          {/* FLIP INNER */}
+          <div
+            style={{
+              ...styles.cardInner,
+              transform: flippedCard === job._id ? "rotateY(180deg)" : "rotateY(0deg)"
+            }}
+          >
 
-            {/* DESCRIPTION */}
-            <p style={{ padding:'3px'}}>{job.description}</p>
+            {/* ================= FRONT SIDE ================= */}
+            {/* ================= FRONT SIDE ================= */}
+<div style={styles.cardFront}>
 
-            {/* INFO */}
-            <div style={styles.infoBox}>
-              💰 {job.budgetMin} - {job.budgetMax} <br />
+  {/* TOP HEADER */}
+  <div style={styles.topSection}>
 
-              {/* ⭐ Employer Rating (NEW UI PLACEHOLDER) */}
-              ⭐ Rating: 4.5 <br />
+    {/* COMPANY NAME */}
+    <div style={styles.companyName}>
+      {job.companyName || "Company Name"}
+    </div>
 
-              {/* 📍 Distance (NEW UI PLACEHOLDER) */}
-              📍 {distances[job._id]} km <br />
+    {/* LOGO */}
+    <div style={styles.logoWrapper}>
 
-              {/* ⏰ Time Posted */}
-              ⏰ Just now
-            </div>
+      <div style={styles.logo}>
+        🏢
+      </div>
 
-            {/* BUTTONS */}
-            <div style={styles.btnRow}>
+    </div>
 
-              {/* ⭐ SAVE JOB (NEW ADDED) */}
-              <button style={styles.saveBtn}>
-                ⭐ Save
-              </button>
+  </div>
 
-              {/* APPLY */}
+  {/* CENTER CONTENT */}
+  <div style={styles.centerSection}>
+
+    {/* JOB TITLE */}
+    <h3 style={styles.titles}>
+      💼 {job.title || job.Title}
+    </h3>
+
+    {/* DETAILS */}
+    <div style={styles.infoBox}>
+
+      <div style={styles.infoItem}>
+        <span>💰 Budget</span>
+        <strong>
+          {job.budgetMin} - {job.budgetMax}
+        </strong>
+      </div>
+
+      <div style={styles.infoItem}>
+        <span>⭐ Rating</span>
+        <strong>4.5</strong>
+      </div>
+
+      <div style={styles.infoItem}>
+        <span>📍 Location</span>
+        <strong>{job.location || job.Location}</strong>
+      </div>
+
+      <div style={styles.infoItem}>
+        <span>⏰ Deadline</span>
+        <strong>{job.deadline || job.Deadline}</strong>
+      </div>
+
+      <div style={styles.infoItem}>
+        <span>🕒 Time</span>
+        <strong>{job.time || job.Time}</strong>
+      </div>
+
+    </div>
+
+  </div>
+
+  {/* BOTTOM BUTTON SECTION */}
+  <div style={styles.bottomSection}>
+
+    <div style={styles.btnRow}>
+
+      <button
+         onClick={(e) => {
+    e.stopPropagation(); // card flip stop
+    openDetailModal(job); // open modal
+  }}
+        style={styles.flipBtn}
+      >
+        View Details
+      </button>
+
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          openBidModal(job);
+        }}
+        style={styles.applyBtn}
+      >
+        Apply Now
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+            {/* ================= BACK SIDE ================= */}
+            <div style={styles.cardBack}>
+
+              <h3 style={{ color: "#ff6a00" }}>Job Description</h3>
+
+              <p style={{ padding: "10px", lineHeight: "1.6" }}>
+                {job.description}
+              </p>
+
               <button
-                onClick={() => openBidModal(job)}
-                style={styles.applyBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleFlip(job._id);
+                }}
+                style={styles.backBtn}
               >
-                Apply
+                Back
               </button>
 
             </div>
 
           </div>
-        ))}
+        </div>
+      ))}
 
-      </div>
+    </div>
 
       {/* 🟠 BID MODAL */}
       {selectedJob && (
@@ -368,6 +473,59 @@ const submitBid = async () => {
 
         </div>
       )}
+
+      {/* ================= VIEW DETAILS MODAL ================= */}
+{detailJob && (
+  <div style={styles.modalOverlay} onClick={() => setDetailJob(null)}>
+
+    {/* prevent closing when clicking inside modal */}
+    <div
+      style={styles.modal}
+      onClick={(e) => e.stopPropagation()}
+    >
+
+      {/* HEADER */}
+      <h2 style={{ color: "#ff6a00", marginBottom: "10px" }}>
+        💼 Job Description
+      </h2>
+      
+      {/* DESCRIPTION */}
+      <div
+        style={{
+          marginTop: "12px",
+          padding: "12px",
+          background: "#fff7f2",
+          borderRadius: "10px",
+          fontSize: "13px",
+          color: "#444",
+          lineHeight: "1.5"
+        }}
+      >
+        {detailJob.description}
+      </div>
+
+      {/* CLOSE BUTTON */}
+      <button
+        onClick={() => setDetailJob(null)}
+        style={{
+          marginTop: "15px",
+          width: "100%",
+          padding: "10px",
+          background: "#ff6a00",
+          color: "#fff",
+          border: "none",
+          borderRadius: "10px",
+          cursor: "pointer",
+          fontWeight: "600"
+        }}
+      >
+        Close
+      </button>
+
+    </div>
+
+  </div>
+)}
 
     </div>
   );
@@ -455,13 +613,23 @@ const styles = {
     border: "1px solid #ff6a00",
   },
 
-  btnRow :{
-    display: "flex",
-    gap: "10px",
-    marginBottom: "15px",
-    alignItems: "center",
-    flexWrap: "wrap",
-  },
+  bottomSection: {
+  padding: "18px",
+  borderTop: "1px solid rgba(255,106,0,0.08)",
+  background: "#fff",
+},
+
+btnRow: {
+  display: "flex",
+  gap: "12px",
+},
+
+  // btnRow: {
+  //   display: "flex",
+  //   justifyContent: "space-between",
+  //   marginTop: "10px",
+  // },
+
 
 
   /* ================= GRID ================= */
@@ -471,17 +639,108 @@ const styles = {
     gap: "16px"
   },
 
-  /* ================= CARD ================= */
-  card: {
-    border: "1px solid #ff6a00",
-    background: "#fff",
-    padding: "10px",
-    borderRadius: "14px",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
-    // display: "flex",
-    flexDirection: "column",
-    // gap: "8px"
+ cardContainer: {
+  perspective: "1200px",
+  width: "100%",
+  maxWidth: "460px",
+  height: "520px",
+  margin: "0 auto",
+  cursor: "pointer",
+},
+
+cardInner: {
+  position: "relative",
+  width: "100%",
+  height: "100%",
+  transformStyle: "preserve-3d",
+  transition: "transform 0.8s",
+},
+
+cardFront: {
+  position: "absolute",
+  width: "100%",
+  height: "100%",
+  backfaceVisibility: "hidden",
+  borderRadius: "24px",
+  overflow: "hidden",
+  background: "#fff",
+  boxShadow: "0 10px 30px rgba(255,106,0,0.15)",
+  border: "1px solid rgba(255,106,0,0.12)",
+  display: "flex",
+  flexDirection: "column",
+},
+topSection: {
+  background: "linear-gradient(135deg, #ff6a00, #ff8c42)",
+  padding: "20px",
+  // borderBottomLeftRadius: "10px",
+  // borderBottomRightRadius: "10px",
+  textAlign: "center",
+  position: "relative",
+  height:'10px'
+},
+
+
+  cardBack: {
+    position: "absolute",
+    width: "90%",
+    height: "100%",
+    backfaceVisibility: "hidden",
+    transform: "rotateY(180deg)",
+    background: "#f9fafb",
+    borderRadius: "15px",
+    padding: "15px",
+    boxShadow: "0 6px 20px rgba(0,0,0,0.1)",
   },
+
+companyName: {
+  color: "#fff",
+  fontSize: "20px",
+  fontWeight: "700",
+  letterSpacing: "0.5px",
+  marginBottom: "10px", // was 18px
+},
+logoWrapper: {
+  display: "flex",
+  justifyContent: "center",
+  marginBottom: "12px", // was -50px
+},
+
+
+ logo: {
+  width: "50px",
+  height: "50px",
+  borderRadius: "50%",
+  background: "#fff",
+  border: "1px solid #ff6803",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: "20px",
+  boxShadow: "0 8px 25px rgba(0,0,0,0.18)",
+},
+centerSection: {
+  padding: "45px 22px 18px", // was 65px top
+},
+
+titles: {
+  textAlign: "center",
+  color: "#ff6a00",
+  fontSize: "20px",
+  fontWeight: "800",
+  marginBottom: "2px", // was 22px
+},
+
+  /* ================= CARD ================= */
+  // card: {
+  //   border: "1px solid #ff6a00",
+  //   background: "#fff",
+  //   padding: "10px",
+  //   borderRadius: "14px",
+  //   boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+  //   // display: "flex",
+  //   flexDirection: "column",
+  //   // gap: "8px"
+  // },
 
   jobTitle: {
     margin: 0,
@@ -496,28 +755,68 @@ const styles = {
     lineHeight: "1.4"
   },
 
-  infoBox: {
-    background: "#fff7f0",
-    padding: "10px",
-    borderRadius: "10px",
-    fontSize: "12px",
-    lineHeight: "1.5",
-    color: "#0e0e0e",
-    // border: "1px solid green",
-    marginBottom: "12px",
-    fontWeight:'bold'
-    
-  },
+infoBox: {
+  display: "flex",
+  flexDirection: "column",
+  gap: "12px",
+},
+
+infoItem: {
+  background: "#fff7f2",
+  border: "1px solid rgba(255,106,0,0.12)",
+  borderRadius: "14px",
+  padding: "12px 14px",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  fontSize: "14px",
+  color: "#444",
+  fontWeight: "500",
+},
+  timeBox: {
+  // marginTop: "8px",
+  // padding: "8px 10px",
+  // background: "#fff3e8",
+  // borderRadius: "10px",
+  fontSize: "13px",
+  color: "#292828",
+  lineHeight: "1.7"
+},
 
   /* ================= BUTTON ================= */
   applyBtn: {
-    padding: "12px",
-    borderRadius: "12px",
-    border: "none",
-    background: "linear-gradient(90deg, #ff6a00, #ff9f1c)",
+  flex: 1,
+  background: "linear-gradient(135deg, #ff6a00, #ff8c42)",
+  color: "#fff",
+  border: "none",
+  padding: "12px",
+  borderRadius: "14px",
+  fontWeight: "700",
+  cursor: "pointer",
+  boxShadow: "0 6px 16px rgba(255,106,0,0.25)",
+  transition: "0.3s",
+},
+
+  flipBtn: {
+  flex: 1,
+  background: "#fff3eb",
+  color: "#ff6a00",
+  border: "none",
+  padding: "12px",
+  borderRadius: "14px",
+  fontWeight: "700",
+  cursor: "pointer",
+  transition: "0.3s",
+},
+
+  backBtn: {
+    marginTop: "15px",
+    background: "#ff6a00",
     color: "#fff",
-    fontWeight: "600",
-    cursor: "pointer"
+    border: "none",
+    padding: "8px 12px",
+    borderRadius: "6px",
+    width: "100%",
   },
 
   /* ================= MODAL ================= */
