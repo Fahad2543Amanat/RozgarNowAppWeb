@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import ProtectedRoute from "./components/ProtectedRoute";
+
 import SplashScreen from "./pages/SplashScreen";
 import Onboarding from "./pages/Onboarding";
 
@@ -45,6 +47,7 @@ function App() {
         
 
         {/* 👤 CLIENT DASHBOARD (Nested Routing) */}
+        <Route element={<ProtectedRoute />}>
         <Route path="/client" element={<ClientLayout />}>
           <Route index element={<ClientDashboard />} />
           <Route path="jobs" element={<Jobs />} />
@@ -56,8 +59,11 @@ function App() {
           <Route path="clientbids" element={<ClientBids />} />
           <Route path="settings" element={<Settings />} />
         </Route>
+        
+        </Route>
 
         {/* 🧑‍🔧 WORKER (Nested like Client) */}
+        <Route element={<ProtectedRoute />}>
 <Route path="/worker" element={<WorkerLayout />}>
   <Route index element={<WorkerDashboard />} />
   <Route path="jobs" element={<WorkerJobs />} />
@@ -68,6 +74,8 @@ function App() {
   <Route path="profile" element={<WorkerProfile />} />
   <Route path="settings" element={<WorkerSettings />} />
 </Route>
+        
+        </Route>
 
       </Routes>
     </BrowserRouter>
